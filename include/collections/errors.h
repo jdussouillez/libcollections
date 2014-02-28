@@ -18,7 +18,7 @@ extern "C" {
 // Collections error number
 extern cerr_t cerrno;
 
-// Returns string describint error number.
+// Returns string describing the error.
 const char* cstrerror(int cerrnum);
 
 // Print an error message.

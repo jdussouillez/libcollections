@@ -9,7 +9,7 @@ all: $(TARGETS)
 
 build:
 	@if [ ! -e ../bin/libcollections.a ]; then \
-		echo "liblog.a not detected. Compiling liblog.a"; \
+		echo "libcollections.a not detected. Compiling it."; \
 		make -C ../; \
 	fi;
 	@$(foreach f, $(EXEC), \
