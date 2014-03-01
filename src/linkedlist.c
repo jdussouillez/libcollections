@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -78,6 +79,44 @@ int llist_addfirst(linkedlist_t* list, void* e) {
   list->size++;
   cerrno = CERR_SUCCESS;
   return 1;
+}
+
+
+int llist_addv(linkedlist_t* list, int nbargs, ...) {
+  va_list ap;
+  void *e, *tmp_array;
+  int i = 0, nb = 0;
+  if (list == NULL) {
+    cerrno = CERR_NULLVALUE;
+    return 0;
+  }
+  if ((tmp_array = malloc(nbargs * sizeof(void*))) == NULL) {
+    cerrno = CERR_SYSTEM;
+    return 0;
+  }
+  memset(tmp_array, 0, nbargs * sizeof(void*));
+  va_start(ap, nbargs);
+  // Check for NULL values
+  for (i = 0; i < nbargs; i++) {
+    e = va_arg(ap, void*);
+    if (e == NULL) {
+      free(tmp_array);
+      cerrno = CERR_NULLVALUE;
+      return 0;
+    }
+    // Save the element into the array
+    memcpy(tmp_array + (i * list->data_size), e, list->data_size);
+  }
+  // Copy array elements in list
+  for (i = 0; i < nbargs; i++) {
+    e = tmp_array + (i * list->data_size);
+    if (e != NULL && llist_add(list, e))
+      nb++;
+  }
+  va_end(ap);
+  free(tmp_array);
+  cerrno = CERR_SUCCESS;
+  return nb;
 }
 
 

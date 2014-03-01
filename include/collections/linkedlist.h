@@ -40,17 +40,26 @@ typedef struct {
 int llist_add(linkedlist_t* list, void* e);
 
 /*
+ * Appends all of the elements in the list "src" to the end of this list "dest" (memory copy).
+ * "dest" and "src" cannot be the same list (cerrno is set to CERR_FORBIDDEN).
+ * On success, returns 1. On error, 0 is returned and "cerrno" is set appropriately.
+ */
+int llist_addall(linkedlist_t* dest, linkedlist_t* src);
+
+/*
  * Inserts the specified element at the beginning of this list (memory copy).
  * On success, returns 1. On error, 0 is returned and "cerrno" is set appropriately.
  */
 int llist_addfirst(linkedlist_t* list, void* e);
 
 /*
- * Appends all of the elements in the list "src" to the end of this list "dest" (memory copy).
- * "dest" and "src" cannot be the same list (cerrno is set to CERR_FORBIDDEN).
- * On success, returns 1. On error, 0 is returned and "cerrno" is set appropriately.
+ * Appends all the elements to the end of the list (memory copy).
+ * The second element is the number of arguments after it.
+ * Example : llist_addv(list, 3, &i, &j, &k).
+ * On success, returns the number of elements added.
+ * On error, 0 is returned and "cerrno" is set appropriately.
  */
-int llist_addall(linkedlist_t* dest, linkedlist_t* src);
+int llist_addv(linkedlist_t* list, int nbargs, ...);
 
 /*
  * Removes all of the elements from this list.

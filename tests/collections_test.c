@@ -108,13 +108,27 @@ void linkedlist_addfirst_TTP() {
   llist_destroy(&list);
 }
 
+void linkedlist_addv_TTP() {
+  int j;
+  list = llist_new(size_int);
+  // Add 3 elements
+  i = 1;
+  j = 2;
+  CU_ASSERT_EQUAL(llist_addv(list, 3, &i, &i, &j), 3);
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  CU_ASSERT_EQUAL(list->size, 3);
+  // list = [1, 1, 2]
+  CU_ASSERT_EQUAL(compare_int(llist_peekfirst(list), &i), 0);
+  CU_ASSERT_EQUAL(compare_int(list->head->next->data, &i), 0);
+  CU_ASSERT_EQUAL(compare_int(llist_peeklast(list), &j), 0);
+  llist_destroy(&list);
+}
+
 void linkedlist_clear_TTP() {
   list = llist_new(size_int);
   i = 1;
   // Add 3 elements and clear the list
-  llist_add(list, &i);
-  llist_add(list, &i);
-  llist_add(list, &i);
+  llist_addv(list, 3, &i, &i, &i);
   llist_clear(list);
   CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
   CU_ASSERT_EQUAL(list->size, 0);
@@ -193,8 +207,7 @@ void linkedlist_count_TTP() {
   i = 0;
   llist_add(list, &i);
   i = 1;
-  llist_add(list, &i);
-  llist_add(list, &i);
+  llist_addv(list, 2, &i, &i);
   // list = [0, 1, 1]
   // The list contains twice the element 1
   CU_ASSERT_EQUAL(llist_count(list, &i, compare_int), 2);
@@ -522,6 +535,19 @@ void linkedlist_addfirst_TTF() {
   llist_destroy(&list);
 }
 
+void linkedlist_addv_TTF() {
+  // NULL list
+  i = 1;
+  CU_ASSERT_EQUAL(llist_addv(NULL, 1, &i), 0);
+  CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
+  // NULL element
+  list = llist_new(size_int);
+  CU_ASSERT_EQUAL(llist_addv(list, 3, &i, NULL, &i), 0);
+  CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
+  CU_ASSERT_EQUAL(list->size, 0);
+  llist_destroy(&list);
+}
+
 void linkedlist_clear_TTF() {
   // NULL list
   llist_clear(NULL);
@@ -721,6 +747,8 @@ int main(void) {
       CU_add_test(pSuite, "linkedlist_destroy_TTF", linkedlist_destroy_TTF) == NULL ||
       CU_add_test(pSuite, "linkedlist_add_TTP", linkedlist_add_TTP) == NULL ||
       CU_add_test(pSuite, "linkedlist_add_TTF", linkedlist_add_TTF) == NULL ||
+      CU_add_test(pSuite, "linkedlist_addv_TTP", linkedlist_addv_TTP) == NULL ||
+      CU_add_test(pSuite, "linkedlist_addv_TTF", linkedlist_addv_TTF) == NULL ||
       CU_add_test(pSuite, "linkedlist_addall_TTP", linkedlist_addall_TTP) == NULL ||
       CU_add_test(pSuite, "linkedlist_addall_TTF", linkedlist_addall_TTF) == NULL ||
       CU_add_test(pSuite, "linkedlist_addfirst_TTP", linkedlist_addfirst_TTP) == NULL ||
