@@ -108,6 +108,19 @@ void llist_destroy(linkedlist_t** list);
 int llist_finddup(linkedlist_t* list, linkedlist_t* duplist, comparefct_t compare);
 
 /*
+ * Returns a list containing all of the elements in the array in
+ * proper sequence (from array[0] to array[size - 1]).
+ * At the end of your program, you must call "llist_destroy" to free the memory.
+ */
+linkedlist_t* llist_fromarray(void* array, int size, size_t data_size);
+
+/*
+ * Returns 1 if the list is sorted (using the compare function, ascending order), 0 otherwise.
+ * On error, -1 is returned and "cerrno" is set approprialety.
+ */
+int llist_issorted(linkedlist_t* list, comparefct_t compare);
+
+/*
  * Creates a new list.
  * On success, returns the list.
  * On error, NULL is returned and "cerrno" is set appropriately.
@@ -156,19 +169,21 @@ int llist_removefirst(linkedlist_t* list);
 int llist_removelast(linkedlist_t* list);
 
 /*
+ * Sorts the list (using the quick sort algorithm).
+ * At the moment, it transforms the list into an array, clears the list,
+ * sorts the array (using qsort(3)) and finally fills the list.
+ * On success, returns 1.
+ * On error, 0 is returned and "cerrno" is set appropriately.
+ */
+int llist_sort(linkedlist_t* list, comparefct_t compare);
+
+/*
  * Returns an array containing all of the elements in the
  * list in proper sequence (from first to last element).
  * The new array is obtained with malloc(3) and can be freed with free(3).
  * On error, NULL is returned and "cerrno" is set appropriately.
  */
 void* llist_toarray(linkedlist_t* list);
-
-/*
- * Returns a list containing all of the elements in the array in
- * proper sequence (from array[0] to array[size - 1]).
- * At the end of your program, you must call "llist_destroy" to free the memory.
- */
-linkedlist_t* llist_fromarray(void* array, int size, size_t data_size);
 
 #ifdef __cplusplus
 }

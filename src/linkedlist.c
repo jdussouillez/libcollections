@@ -182,6 +182,41 @@ int llist_finddup(linkedlist_t* list, linkedlist_t* duplist, comparefct_t compar
   return duplist->size;
 }
 
+linkedlist_t* llist_fromarray(void* array, int size, size_t data_size) {
+  linkedlist_t* list;
+  int i;
+  if (array == NULL) {
+    cerrno = CERR_NULLVALUE;
+    return NULL;
+  }
+  list = llist_new(data_size);
+  if (list == NULL)
+    return NULL;
+  for (i = 0; i < size; i++) {
+    if (!llist_add(list, array + (i * data_size))) {
+      llist_destroy(&list);
+      return NULL;
+    }
+  }
+  cerrno = CERR_SUCCESS;
+  return list;
+}
+
+int llist_issorted(linkedlist_t* list, comparefct_t compare) {
+  void* previous_data = NULL;
+  if (list == NULL || compare == NULL) {
+    cerrno = CERR_NULLVALUE;
+    return -1;
+  }
+  LLIST_FOREACH(list, {
+      if (previous_data != NULL &&
+	  compare(previous_data, data) > 0) // previous element is greater than current
+	return 0;
+      previous_data = data;
+    });
+  return 1;
+}
+
 linkedlist_t* llist_new(size_t data_size) {
   linkedlist_t* list = malloc(sizeof(linkedlist_t));
   if (list == NULL) {
@@ -305,6 +340,30 @@ int llist_removelast(linkedlist_t* list) {
   return 1;
 }
 
+int llist_sort(linkedlist_t* list, comparefct_t compare) {
+  int size, i;
+  void* array;
+  if (list == NULL || compare == NULL) {
+    cerrno = CERR_NULLVALUE;
+    return 0;
+  }
+  array = llist_toarray(list);
+  if (array == NULL)
+    return 0;
+  size = list->size;
+  llist_clear(list);
+  // If no (__compar_fn_t) cast, gcc produces a warning (incompatible pointer type)
+  qsort(array, size, list->data_size, (__compar_fn_t)compare);
+  for (i = 0; i < size; i++) {
+    if (!llist_add(list, array + (i * list->data_size))) {
+      free(array);
+      return 0;
+    }
+  }
+  free(array);
+  return 1;
+}
+
 void* llist_toarray(linkedlist_t* list) {
   void* array;
   int i = 0;
@@ -323,24 +382,4 @@ void* llist_toarray(linkedlist_t* list) {
     });
   cerrno = CERR_SUCCESS;
   return array;
-}
-
-linkedlist_t* llist_fromarray(void* array, int size, size_t data_size) {
-  linkedlist_t* list;
-  int i;
-  if (array == NULL) {
-    cerrno = CERR_NULLVALUE;
-    return NULL;
-  }
-  list = llist_new(data_size);
-  if (list == NULL)
-    return NULL;
-  for (i = 0; i < size; i++) {
-    if (!llist_add(list, array + (i * data_size))) {
-      llist_destroy(&list);
-      return NULL;
-    }
-  }
-  cerrno = CERR_SUCCESS;
-  return list;
 }

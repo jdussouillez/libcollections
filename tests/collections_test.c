@@ -227,6 +227,40 @@ void linkedlist_finddup_TTP() {
   llist_destroy(&list);
 }
 
+void linkedlist_fromarray_TTP() {
+  int i = 1, j = 2;
+  int array[2] = {i, j};
+  list = llist_fromarray(array, 2, sizeof(int));
+  CU_ASSERT_PTR_NOT_NULL(list);
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  CU_ASSERT_EQUAL(list->size, 2);
+  // Check values
+  CU_ASSERT_EQUAL(compare_int(llist_peekfirst(list), &i), 0);
+  CU_ASSERT_EQUAL(compare_int(llist_peeklast(list), &j), 0);
+  llist_destroy(&list);
+}
+
+void linkedlist_issorted_TTP() {
+  list = llist_new(size_int);
+  i = 1;
+  llist_add(list, &i);
+  i = 2;
+  llist_add(list, &i);
+  i = 3;
+  llist_add(list, &i);
+  // On a sorted list ([1, 2, 3])
+  CU_ASSERT_EQUAL(llist_issorted(list, compare_int), 1);
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  i = 1;
+  llist_add(list, &i);
+  i = -5;
+  llist_add(list, &i);
+  // On a non-sorted list ([1, 2, 3, 1, -5])
+  CU_ASSERT_EQUAL(llist_issorted(list, compare_int), 0);
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  llist_destroy(&list);
+}
+
 void linkedlist_peekfirst_TTP() {
   list = llist_new(size_int);
   // On an empty list
@@ -338,6 +372,34 @@ void linkedlist_removelast_TTP() {
   llist_destroy(&list);
 }
 
+void linkedlist_sort_TTP() {
+  list = llist_new(size_int);
+  // Sort an empty list
+  CU_ASSERT_EQUAL(llist_sort(list, compare_int), 1);
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  // Already sorted, list = [1, 2] --> list = [1, 2]
+  i = 1;
+  llist_add(list, &i);
+  i = 2;
+  llist_add(list, &i);
+  CU_ASSERT_EQUAL(llist_sort(list, compare_int), 1);
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  CU_ASSERT_EQUAL(compare_int(llist_peeklast(list), &i), 0);
+  i = 1;
+  CU_ASSERT_EQUAL(compare_int(llist_peekfirst(list), &i), 0);
+  // Sorted by llist_sort(), list = [1, 2, -5, 9, 2] --> list = [-5, 1, 2, 2, 9]
+  i = -5;
+  llist_add(list, &i);
+  i = 9;
+  llist_add(list, &i);
+  i = 2;
+  llist_add(list, &i);
+  CU_ASSERT_EQUAL(llist_sort(list, compare_int), 1);
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  CU_ASSERT_TRUE(llist_issorted(list, compare_int));
+  llist_destroy(&list);
+}
+
 void linkedlist_toarray_TTP() {
   void* array = NULL;
   list = llist_new(size_int);
@@ -364,23 +426,10 @@ void linkedlist_toarray_TTP() {
   llist_destroy(&list);
 }
 
-void linkedlist_fromarray_TTP() {
-  int i = 1, j = 2;
-  int array[2] = {i, j};
-  list = llist_fromarray(array, 2, sizeof(int));
-  CU_ASSERT_PTR_NOT_NULL(list);
-  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
-  CU_ASSERT_EQUAL(list->size, 2);
-  // Check values
-  CU_ASSERT_EQUAL(compare_int(llist_peekfirst(list), &i), 0);
-  CU_ASSERT_EQUAL(compare_int(llist_peeklast(list), &j), 0);
-  llist_destroy(&list);
-}
-
 /*
- *
+ ********************************
  * Test-to-fail
- *
+ ********************************
  */
 void linkedlist_destroy_TTF() {
   // NULL list and NULL pointer
@@ -511,12 +560,31 @@ void linkedlist_finddup_TTF() {
   llist_destroy(&duplist);
 }
 
+void linkedlist_fromarray_TTF() {
+  // NULL list
+  CU_ASSERT_PTR_NULL(llist_fromarray(NULL, 2, sizeof(int)));
+  CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
+}
+
+void linkedlist_issorted_TTF() {
+  // NULL list
+  CU_ASSERT_EQUAL(llist_issorted(NULL, compare_int), -1);
+  CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
+  // NULL compare function
+  list = llist_new(size_int);
+  CU_ASSERT_EQUAL(llist_issorted(list, NULL), -1);
+  CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
+  llist_destroy(&list);
+}
+
 void linkedlist_peekfirst_TTF() {
+  // NULL list
   CU_ASSERT_PTR_NULL(llist_peekfirst(NULL));
   CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
 }
 
 void linkedlist_peeklast_TTF() {
+  // NULL list
   CU_ASSERT_PTR_NULL(llist_peekfirst(NULL));
   CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
 }
@@ -563,15 +631,20 @@ void linkedlist_removelast_TTF() {
   CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
 }
 
+void linkedlist_sort_TTF() {
+  // NULL list
+  CU_ASSERT_EQUAL(llist_sort(NULL, compare_int), 0);
+  CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
+  // NULL compare function
+  list = llist_new(size_int);
+  CU_ASSERT_EQUAL(llist_sort(list, NULL), 0);
+  CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
+  llist_destroy(&list);
+}
+
 void linkedlist_toarray_TTF() {
   // NULL list
   CU_ASSERT_PTR_NULL(llist_toarray(NULL));
-  CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
-}
-
-void linkedlist_fromarray_TTF() {
-  // NULL list
-  CU_ASSERT_PTR_NULL(llist_fromarray(NULL, 2, sizeof(int)));
   CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
 }
 
@@ -616,6 +689,10 @@ int main(void) {
       CU_add_test(pSuite, "linkedlist_count_TTF", linkedlist_count_TTF) == NULL ||
       CU_add_test(pSuite, "linkedlist_finddup_TTP", linkedlist_finddup_TTP) == NULL ||
       CU_add_test(pSuite, "linkedlist_finddup_TTF", linkedlist_finddup_TTF) == NULL ||
+      CU_add_test(pSuite, "linkedlist_fromarray_TTP", linkedlist_fromarray_TTP) == NULL ||
+      CU_add_test(pSuite, "linkedlist_fromarray_TTF", linkedlist_fromarray_TTF) == NULL ||
+      CU_add_test(pSuite, "linkedlist_issorted_TTP", linkedlist_issorted_TTP) == NULL ||
+      CU_add_test(pSuite, "linkedlist_issorted_TTF", linkedlist_issorted_TTF) == NULL ||
       CU_add_test(pSuite, "linkedlist_peekfirst_TTP", linkedlist_peekfirst_TTP) == NULL ||
       CU_add_test(pSuite, "linkedlist_peekfirst_TTF", linkedlist_peekfirst_TTF) == NULL ||
       CU_add_test(pSuite, "linkedlist_peeklast_TTP", linkedlist_peeklast_TTP) == NULL ||
@@ -628,10 +705,10 @@ int main(void) {
       CU_add_test(pSuite, "linkedlist_removefirst_TTF", linkedlist_removeall_TTF) == NULL ||
       CU_add_test(pSuite, "linkedlist_removelast_TTP", linkedlist_removeall_TTP) == NULL ||
       CU_add_test(pSuite, "linkedlist_removelast_TTF", linkedlist_removeall_TTF) == NULL ||
+      CU_add_test(pSuite, "linkedlist_sort_TTP", linkedlist_sort_TTP) == NULL ||
+      CU_add_test(pSuite, "linkedlist_sort_TTF", linkedlist_sort_TTF) == NULL ||
       CU_add_test(pSuite, "linkedlist_toarray_TTP", linkedlist_toarray_TTP) == NULL ||
-      CU_add_test(pSuite, "linkedlist_toarray_TTF", linkedlist_toarray_TTF) == NULL ||
-      CU_add_test(pSuite, "linkedlist_fromarray_TTP", linkedlist_fromarray_TTP) == NULL ||
-      CU_add_test(pSuite, "linkedlist_fromarray_TTF", linkedlist_fromarray_TTF) == NULL) {
+      CU_add_test(pSuite, "linkedlist_toarray_TTF", linkedlist_toarray_TTF) == NULL) {
     CU_cleanup_registry();
     return CU_get_error();
   }
