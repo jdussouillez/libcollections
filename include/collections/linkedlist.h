@@ -185,6 +185,16 @@ int llist_sort(linkedlist_t* list, comparefct_t compare);
  */
 void* llist_toarray(linkedlist_t* list);
 
+/*
+ * Returns a string describing the list.
+ * The format is [elem1, elem2, elem3], where elem3
+ * is a string returned by the function tostring(). The tostring function must returned an
+ * pointer to a memory allocated with malloc(3) (the memory is freed in llist_tostring with free(3)).
+ * The maximum length of the returned string is BUFSIZE (defined in core.h).
+ * On error, returns NULL and "cerrno" is set appropriately.
+ */
+char* llist_tostring(linkedlist_t* list, tostringfct_t tostring);
+
 #ifdef __cplusplus
 }
 #endif

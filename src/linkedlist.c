@@ -34,6 +34,7 @@ int llist_add(linkedlist_t* list, void* e) {
   return 1;
 }
 
+
 int llist_addall(linkedlist_t* dest, linkedlist_t* src) {
   if (dest == NULL || src == NULL) {
     cerrno = CERR_NULLVALUE;
@@ -79,6 +80,7 @@ int llist_addfirst(linkedlist_t* list, void* e) {
   return 1;
 }
 
+
 void llist_clear(linkedlist_t* list) {
   int i;
   if (list == NULL) {
@@ -92,6 +94,7 @@ void llist_clear(linkedlist_t* list) {
   list->size = 0;
   cerrno = CERR_SUCCESS;
 }
+
 
 linkedlist_t* llist_clone(linkedlist_t* list) {
   linkedlist_t* clone;
@@ -108,6 +111,7 @@ linkedlist_t* llist_clone(linkedlist_t* list) {
   return clone;
 }
 
+
 int llist_cmp(linkedlist_t* l1, linkedlist_t* l2, comparefct_t compare) {
   linkedlistnode_t *nodel1, *nodel2;
   int cmp;
@@ -115,6 +119,7 @@ int llist_cmp(linkedlist_t* l1, linkedlist_t* l2, comparefct_t compare) {
     cerrno = CERR_NULLVALUE;
     return -1;
   }
+  cerrno = CERR_SUCCESS;
   // Compare size of data
   cmp = l1->data_size - l2->data_size;
   if (cmp != 0)
@@ -135,9 +140,11 @@ int llist_cmp(linkedlist_t* l1, linkedlist_t* l2, comparefct_t compare) {
   return 0;
 }
 
+
 int llist_contains(linkedlist_t* list, void* e, comparefct_t compare) {
   return llist_count(list, e, compare) > 0;
 }
+
 
 int llist_count(linkedlist_t* list, void* e, comparefct_t compare) {
   int cpt = 0;
@@ -153,6 +160,7 @@ int llist_count(linkedlist_t* list, void* e, comparefct_t compare) {
   return cpt;
 }
 
+
 void llist_destroy(linkedlist_t** list) {
   if (list == NULL || *list == NULL) {
     cerrno = CERR_NULLVALUE;
@@ -163,6 +171,7 @@ void llist_destroy(linkedlist_t** list) {
   *list = NULL;
   cerrno = CERR_SUCCESS;
 }
+
 
 int llist_finddup(linkedlist_t* list, linkedlist_t* duplist, comparefct_t compare) {
   if (list == NULL || duplist == NULL || compare == NULL) {
@@ -181,6 +190,7 @@ int llist_finddup(linkedlist_t* list, linkedlist_t* duplist, comparefct_t compar
   cerrno = CERR_SUCCESS;
   return duplist->size;
 }
+
 
 linkedlist_t* llist_fromarray(void* array, int size, size_t data_size) {
   linkedlist_t* list;
@@ -202,12 +212,14 @@ linkedlist_t* llist_fromarray(void* array, int size, size_t data_size) {
   return list;
 }
 
+
 int llist_issorted(linkedlist_t* list, comparefct_t compare) {
   void* previous_data = NULL;
   if (list == NULL || compare == NULL) {
     cerrno = CERR_NULLVALUE;
     return -1;
   }
+  cerrno = CERR_SUCCESS;
   LLIST_FOREACH(list, {
       if (previous_data != NULL &&
 	  compare(previous_data, data) > 0) // previous element is greater than current
@@ -231,6 +243,7 @@ linkedlist_t* llist_new(size_t data_size) {
   return list;
 }
 
+
 void* llist_peekfirst(linkedlist_t* list) {
   if (list == NULL) {
     cerrno = CERR_NULLVALUE;
@@ -240,6 +253,7 @@ void* llist_peekfirst(linkedlist_t* list) {
   return (list->size == 0) ? NULL : list->head->data;
 }
 
+
 void* llist_peeklast(linkedlist_t* list) {
   if (list == NULL) {
     cerrno = CERR_NULLVALUE;
@@ -248,6 +262,7 @@ void* llist_peeklast(linkedlist_t* list) {
   cerrno = CERR_SUCCESS;
   return (list->size == 0) ? NULL : list->tail->data;
 }
+
 
 static int _llist_remove(linkedlist_t* list, void* e, comparefct_t compare, int removeall) {
   linkedlistnode_t *node, *previous = NULL;
@@ -281,13 +296,16 @@ static int _llist_remove(linkedlist_t* list, void* e, comparefct_t compare, int 
   return cpt;
 }
 
+
 int llist_remove(linkedlist_t* list, void* e, comparefct_t compare) {
   return _llist_remove(list, e, compare, 0);
 }
 
+
 int llist_removeall(linkedlist_t* list, void* e, comparefct_t compare) {
   return _llist_remove(list, e, compare, 1);
 }
+
 
 int llist_removefirst(linkedlist_t* list) {
   linkedlistnode_t* tmp;
@@ -311,6 +329,7 @@ int llist_removefirst(linkedlist_t* list) {
   list->size--;
   return 1;
 }
+
 
 int llist_removelast(linkedlist_t* list) {
   linkedlistnode_t* node;
@@ -340,6 +359,7 @@ int llist_removelast(linkedlist_t* list) {
   return 1;
 }
 
+
 int llist_sort(linkedlist_t* list, comparefct_t compare) {
   int size, i;
   void* array;
@@ -354,6 +374,7 @@ int llist_sort(linkedlist_t* list, comparefct_t compare) {
   llist_clear(list);
   // If no (__compar_fn_t) cast, gcc produces a warning (incompatible pointer type)
   qsort(array, size, list->data_size, (__compar_fn_t)compare);
+  cerrno = CERR_SUCCESS;
   for (i = 0; i < size; i++) {
     if (!llist_add(list, array + (i * list->data_size))) {
       free(array);
@@ -363,6 +384,7 @@ int llist_sort(linkedlist_t* list, comparefct_t compare) {
   free(array);
   return 1;
 }
+
 
 void* llist_toarray(linkedlist_t* list) {
   void* array;
@@ -382,4 +404,29 @@ void* llist_toarray(linkedlist_t* list) {
     });
   cerrno = CERR_SUCCESS;
   return array;
+}
+
+
+char* llist_tostring(linkedlist_t* list, tostringfct_t tostring) {
+  char *strlist, *strelem;
+  if (list == NULL || tostring == NULL) {
+    cerrno = CERR_NULLVALUE;
+    return NULL;
+  }
+  if ((strlist = malloc(BUFSIZE * sizeof(char))) == NULL) {
+    cerrno = CERR_SYSTEM;
+    return NULL;
+  }
+  strcpy(strlist, "[");
+  LLIST_FOREACH(list, {
+      if ((strelem = tostring(data)) != NULL) {
+	strcat(strlist, strelem);
+	free(strelem);
+	if (node->next != NULL)
+	  strcat(strlist, ", ");
+      }
+    });
+  strcat(strlist, "]");
+  cerrno = CERR_SUCCESS;
+  return strlist;
 }

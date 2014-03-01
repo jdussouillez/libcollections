@@ -1,6 +1,8 @@
 #ifndef CORE_H
 #define CORE_H
 
+#define BUFSIZE 2048
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -10,6 +12,13 @@ extern "C" {
  * Returns 0 if the objects are equals.
  */
 typedef int (*comparefct_t)(void*, void*);
+
+/*
+ * Function pointer that describes a function which
+ * returns a string describing the element.
+ * Must returns NULL on error.
+ */
+typedef char* (*tostringfct_t)(void*);
 
 #ifdef __cplusplus
 }

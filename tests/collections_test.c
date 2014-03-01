@@ -16,6 +16,14 @@ int compare_int(void* i1, void* i2) {
   return *((int*) i1) - *((int*) i2);
 }
 
+char* inttostring(void* i) {
+  char* str;
+  if ((str = malloc(16 * sizeof(char))) == NULL)
+    return NULL;
+  snprintf(str, 16, "%d", *((int*) i));
+  return str;
+}
+
 int i, size_int = sizeof(int);
 linkedlist_t* list;
 
@@ -426,6 +434,35 @@ void linkedlist_toarray_TTP() {
   llist_destroy(&list);
 }
 
+void linkedlist_tostring_TTP() {
+  char* str;
+  list = llist_new(size_int);
+  // On an empty list
+  str = llist_tostring(list, inttostring);
+  CU_ASSERT_PTR_NOT_NULL(str);
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  CU_ASSERT_EQUAL(strcmp(str, "[]"), 0);
+  free(str);
+  str = NULL;
+  // On a non-empty list
+  i = 1;
+  llist_add(list, &i);
+  i = 2;
+  llist_add(list, &i);
+  i = 4;
+  llist_add(list, &i);
+  i = 8;
+  llist_add(list, &i);
+  i = 16;
+  llist_add(list, &i);
+  str = llist_tostring(list, inttostring);
+  CU_ASSERT_PTR_NOT_NULL(str);
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  CU_ASSERT_EQUAL(strcmp(str, "[1, 2, 4, 8, 16]"), 0);
+  free(str);
+  llist_destroy(&list);
+}
+
 /*
  ********************************
  * Test-to-fail
@@ -648,6 +685,17 @@ void linkedlist_toarray_TTF() {
   CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
 }
 
+void linkedlist_tostring_TTF() {
+  // NULL list
+  CU_ASSERT_EQUAL(llist_tostring(NULL, inttostring), NULL);
+  CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
+  // NULL tostring function
+  list = llist_new(size_int);
+  CU_ASSERT_EQUAL(llist_tostring(list, NULL), NULL);
+  CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
+  llist_destroy(&list);
+}
+
 /*
  ********************************************************
  ************************* Main *************************
@@ -708,7 +756,9 @@ int main(void) {
       CU_add_test(pSuite, "linkedlist_sort_TTP", linkedlist_sort_TTP) == NULL ||
       CU_add_test(pSuite, "linkedlist_sort_TTF", linkedlist_sort_TTF) == NULL ||
       CU_add_test(pSuite, "linkedlist_toarray_TTP", linkedlist_toarray_TTP) == NULL ||
-      CU_add_test(pSuite, "linkedlist_toarray_TTF", linkedlist_toarray_TTF) == NULL) {
+      CU_add_test(pSuite, "linkedlist_toarray_TTF", linkedlist_toarray_TTF) == NULL ||
+      CU_add_test(pSuite, "linkedlist_tostring_TTP", linkedlist_tostring_TTP) == NULL ||
+      CU_add_test(pSuite, "linkedlist_tostring_TTF", linkedlist_tostring_TTF) == NULL) {
     CU_cleanup_registry();
     return CU_get_error();
   }
