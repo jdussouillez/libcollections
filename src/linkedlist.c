@@ -323,15 +323,16 @@ static int _llist_remove(linkedlist_t* list, void* e, comparefct_t compare, int 
     if (((compare == NULL) ?
 	 memcmp(node->data, e, list->data_size) :
 	 compare(node->data, e)) == 0) {
-      if (previous == NULL)
+      if (previous == NULL) {
 	list->head = list->head->next; // Remove first element of the list
+      }
       else
 	previous->next = node->next;
       free(node->data);
       free(node);
       cpt++;
       list->size--;
-      if (!removeall)
+      if (!removeall || list->size == 0)
 	return 1;
       node = previous->next;
     }
