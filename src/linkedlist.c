@@ -461,7 +461,7 @@ char* llist_tostring(linkedlist_t* list, tostringfct_t tostring) {
     cerrno = CERR_NULLVALUE;
     return NULL;
   }
-  if ((strlist = malloc(BUFSIZE * sizeof(char))) == NULL) {
+  if ((strlist = malloc(CBUFSIZE * sizeof(char))) == NULL) {
     cerrno = CERR_SYSTEM;
     return NULL;
   }

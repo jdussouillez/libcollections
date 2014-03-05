@@ -1,7 +1,7 @@
 #ifndef CORE_H
 #define CORE_H
 
-#define BUFSIZE 2048
+#define CBUFSIZE 2048
 
 #ifdef __cplusplus
 extern "C" {
