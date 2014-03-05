@@ -154,7 +154,7 @@ linkedlist_t* llist_clone(linkedlist_t* list) {
 int llist_cmp(linkedlist_t* l1, linkedlist_t* l2, comparefct_t compare) {
   linkedlistnode_t *nodel1, *nodel2;
   int cmp;
-  if (l1 == NULL || l2 == NULL || compare == NULL) {
+  if (l1 == NULL || l2 == NULL) {
     cerrno = CERR_NULLVALUE;
     return -1;
   }
@@ -171,7 +171,10 @@ int llist_cmp(linkedlist_t* l1, linkedlist_t* l2, comparefct_t compare) {
   nodel1 = l1->head;
   nodel2 = l2->head;
   while (nodel1 != NULL) {
-    if ((cmp = compare(nodel1->data, nodel2->data)) != 0)
+    cmp = ((compare == NULL) ?
+	   memcmp(nodel1->data, nodel2->data, l1->data_size) :
+	   compare(nodel1->data, nodel2->data));
+    if (cmp != 0)
       return cmp;
     nodel1 = nodel1->next;
     nodel2 = nodel2->next;
@@ -187,12 +190,14 @@ int llist_contains(linkedlist_t* list, void* e, comparefct_t compare) {
 
 int llist_count(linkedlist_t* list, void* e, comparefct_t compare) {
   int cpt = 0;
-  if (list == NULL || e == NULL || compare == NULL) {
+  if (list == NULL || e == NULL) {
     cerrno = CERR_NULLVALUE;
     return -1;
   }
   LLIST_FOREACH(list, {
-      if (compare(data, e) == 0)
+      if (((compare != NULL) ?
+	   compare(data, e) :
+	   memcmp(data, e, list->data_size)) == 0)
 	cpt++;
     });
   cerrno = CERR_SUCCESS;
@@ -213,7 +218,7 @@ void llist_destroy(linkedlist_t** list) {
 
 
 int llist_finddup(linkedlist_t* list, linkedlist_t* duplist, comparefct_t compare) {
-  if (list == NULL || duplist == NULL || compare == NULL) {
+  if (list == NULL || duplist == NULL) {
     cerrno = CERR_NULLVALUE;
     return -1;
   }
@@ -254,14 +259,16 @@ linkedlist_t* llist_fromarray(void* array, int size, size_t data_size) {
 
 int llist_issorted(linkedlist_t* list, comparefct_t compare) {
   void* previous_data = NULL;
-  if (list == NULL || compare == NULL) {
+  if (list == NULL) {
     cerrno = CERR_NULLVALUE;
     return -1;
   }
   cerrno = CERR_SUCCESS;
   LLIST_FOREACH(list, {
       if (previous_data != NULL &&
-	  compare(previous_data, data) > 0) // previous element is greater than current
+	  ((compare == NULL) ?
+	   memcmp(previous_data, data, list->data_size) :
+	   compare(previous_data, data)) > 0) // previous element is greater than current
 	return 0;
       previous_data = data;
     });
@@ -306,14 +313,16 @@ void* llist_peeklast(linkedlist_t* list) {
 static int _llist_remove(linkedlist_t* list, void* e, comparefct_t compare, int removeall) {
   linkedlistnode_t *node, *previous = NULL;
   int cpt = 0;
-  if (list == NULL || e == NULL || compare == NULL) {
+  if (list == NULL || e == NULL) {
     cerrno = CERR_NULLVALUE;
     return -1;
   }
   cerrno = CERR_SUCCESS;
   node = list->head;
   while (node != NULL) {
-    if (compare(node->data, e) == 0) {
+    if (((compare == NULL) ?
+	 memcmp(node->data, e, list->data_size) :
+	 compare(node->data, e)) == 0) {
       if (previous == NULL)
 	list->head = list->head->next; // Remove first element of the list
       else

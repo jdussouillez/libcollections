@@ -569,9 +569,6 @@ void linkedlist_cmp_TTF() {
   // NULL list 2
   CU_ASSERT_EQUAL(llist_cmp(list, NULL, compare_int), -1);
   CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
-  // NULL compare function
-  CU_ASSERT_EQUAL(llist_cmp(list, list2, NULL), -1);
-  CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
   llist_destroy(&list);
   llist_destroy(&list2);
 }
@@ -586,9 +583,6 @@ void linkedlist_contains_TTF() {
   CU_ASSERT_FALSE(llist_contains(list, NULL, compare_int));
   CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
   llist_destroy(&list);
-  // NULL compare function
-  CU_ASSERT_FALSE(llist_contains(list, &i, NULL));
-  CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
 }
 
 void linkedlist_count_TTF() {
@@ -599,9 +593,6 @@ void linkedlist_count_TTF() {
   CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
   // NULL element
   CU_ASSERT_EQUAL(llist_count(list, NULL, compare_int), -1);
-  CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
-  // NULL compare function
-  CU_ASSERT_EQUAL(llist_count(list, &i, NULL), -1);
   CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
   llist_destroy(&list);
 }
@@ -616,9 +607,6 @@ void linkedlist_finddup_TTF() {
   // NULL duplicate list
   CU_ASSERT_EQUAL(llist_finddup(list, NULL, compare_int), -1);
   CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
-  // NULL compare function
-  CU_ASSERT_EQUAL(llist_finddup(list, duplist, NULL), -1);
-  CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
   llist_destroy(&list);
   llist_destroy(&duplist);
 }
@@ -632,10 +620,6 @@ void linkedlist_fromarray_TTF() {
 void linkedlist_issorted_TTF() {
   // NULL list
   CU_ASSERT_EQUAL(llist_issorted(NULL, compare_int), -1);
-  CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
-  // NULL compare function
-  list = llist_new(size_int);
-  CU_ASSERT_EQUAL(llist_issorted(list, NULL), -1);
   CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
   llist_destroy(&list);
 }
@@ -661,9 +645,6 @@ void linkedlist_remove_TTF() {
   // NULL element
   CU_ASSERT_EQUAL(llist_remove(list, NULL, compare_int), -1);
   CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
-  // NULL compare function
-  CU_ASSERT_EQUAL(llist_remove(list, &i, NULL), -1);
-  CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
   llist_destroy(&list);
 }
 
@@ -675,9 +656,6 @@ void linkedlist_removeall_TTF() {
   CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
   // NULL element
   CU_ASSERT_EQUAL(llist_removeall(list, NULL, compare_int), -1);
-  CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
-  // NULL compare function
-  CU_ASSERT_EQUAL(llist_removeall(list, &i, NULL), -1);
   CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
   llist_destroy(&list);
 }

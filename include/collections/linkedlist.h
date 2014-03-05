@@ -84,12 +84,14 @@ linkedlist_t* llist_clone(linkedlist_t* list);
  * Then, the function iterates over the elements.
  * If a different element is found (using compare function), returns the returned value
  * of compare(elem_of_l1, elem_of_l2).
+ * If "compare" is NULL, the function uses memcmp(3).
  * If the lists are equals, returns 0.
  */
 int llist_cmp(linkedlist_t* l1, linkedlist_t* l2, comparefct_t compare);
 
 /*
  * Check if an element is in the list using the function "compare".
+ * If "compare" is NULL, the function uses memcmp(3).
  * Returns 1 if the element was found, 0 if not.
  * On error, -1 is returned and "cerrno" is set appropriately.
  */
@@ -98,6 +100,7 @@ int llist_contains(linkedlist_t* list, void* e, comparefct_t compare);
 /*
  * Count the occurences of an element in the list.
  * Returns the number of occurences.
+ * If "compare" is NULL, the function uses memcmp(3).
  * On error, -1 is returned and "cerrno" is set appropriately.
  */
 int llist_count(linkedlist_t* list, void* e, comparefct_t compare);
@@ -111,6 +114,7 @@ void llist_destroy(linkedlist_t** list);
 /*
  * Fill the list "duplist" with all the duplicates element in the list.
  * All the elements in "duplist" are removed before the process.
+ * If "compare" is NULL, the function uses memcmp(3).
  * On success, returns the number of different duplicated elements found (size of duplist).
  * On error, -1 is returned and "cerrno" is set appropriately.
  */
@@ -125,6 +129,7 @@ linkedlist_t* llist_fromarray(void* array, int size, size_t data_size);
 
 /*
  * Returns 1 if the list is sorted (using the compare function, ascending order), 0 otherwise.
+ * If "compare" is NULL, the function uses memcmp(3).
  * On error, -1 is returned and "cerrno" is set approprialety.
  */
 int llist_issorted(linkedlist_t* list, comparefct_t compare);
@@ -151,6 +156,7 @@ void* llist_peeklast(linkedlist_t* list);
 
 /*
  * Removes the first occurrence of the specified element from the list, if it is present.
+ * If "compare" is NULL, the function uses memcmp(3).
  * On success, returns 1 if the element was found and removed, 0 otherwise.
  * On error, -1 is returned and "cerrno" is set appropriately.
  */
@@ -158,6 +164,7 @@ int llist_remove(linkedlist_t* list, void* e, comparefct_t compare);
 
 /*
  * Removes all the occurrences of the specified element from the list, if it is present.
+ * If "compare" is NULL, the function uses memcmp(3).
  * On success, returns the number of elements removed, 0 if there is no such element.
  * On error, -1 is returned and "cerrno" is set appropriately.
  */
@@ -179,8 +186,9 @@ int llist_removelast(linkedlist_t* list);
 
 /*
  * Sorts the list (using the quick sort algorithm).
- * At the moment, it transforms the list into an array, clears the list,
+ * It transforms the list into an array, clears the list,
  * sorts the array (using qsort(3)) and finally fills the list.
+ * If "compare" function can not be NULL (error CERR_NULLVALUE).
  * On success, returns 1.
  * On error, 0 is returned and "cerrno" is set appropriately.
  */
