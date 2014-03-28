@@ -353,6 +353,14 @@ void linkedlist_removeall_TTP() {
   CU_ASSERT_EQUAL(llist_removeall(list, &i, compare_int), 0);
   CU_ASSERT_EQUAL(list->size, 1);
   CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  // Remove all the elements of the list
+  llist_clear(list);
+  i = 1;
+  llist_addv(list, 3, &i, &i, &i);
+  CU_ASSERT_EQUAL(list->size, 3);
+  CU_ASSERT_EQUAL(llist_removeall(list, &i, compare_int), 3);
+  CU_ASSERT_EQUAL(list->size, 0);
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
   // Remove on an empty list
   llist_clear(list);
   CU_ASSERT_EQUAL(llist_removeall(list, &i, compare_int), 0);
@@ -714,7 +722,9 @@ int main(void) {
     return CU_get_error();
 
   /*
+   *--------------------------------
    * Linked list suite
+   *--------------------------------
    */
   pSuite = CU_add_suite("Linked List", init_suite, clean_suite);
   if (pSuite == NULL) {
@@ -779,3 +789,4 @@ int main(void) {
   CU_cleanup_registry();
   return num_failures;
 }
+

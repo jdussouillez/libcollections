@@ -331,9 +331,10 @@ static int _llist_remove(linkedlist_t* list, void* e, comparefct_t compare, int 
       free(node);
       cpt++;
       list->size--;
-      if (!removeall || list->size == 0)
-	return 1;
-      node = previous->next;
+      if (list->size == 0 || !removeall) {
+	return cpt;
+      }
+      node = (previous == NULL) ? list->head : previous->next;
     }
     else {
       // Go to the next node
@@ -478,3 +479,4 @@ char* llist_tostring(linkedlist_t* list, tostringfct_t tostring) {
   cerrno = CERR_SUCCESS;
   return strlist;
 }
+
