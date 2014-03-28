@@ -20,6 +20,8 @@ libcollections provides different types of collections (see the samples folder) 
 - Linked list
 - // TODO
 
+Have a look to the include file ("include/collections/name_of_collection.h") to see the available functions.
+
 Tools
 -----
 
