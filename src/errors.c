@@ -9,10 +9,11 @@ cerr_t cerrno = CERR_SUCCESS;
 static const char* cerr_msg[] = {"Success",
 				 "NULL parameter",
 				 "System error", // Useless because we use errno to display the system error
-				 "Forbidden parameter"};
+				 "Forbidden parameter", 
+				 "Bad index"};
 
 const char* cstrerror(int errnum) {
-  if (errnum < 0 || errnum > 3)
+  if (errnum < 0 || errnum > 4)
     return NULL;
   return (errnum == CERR_SYSTEM) ? strerror(errno) : cerr_msg[errnum];
 }

@@ -8,7 +8,8 @@ typedef enum {
   CERR_SUCCESS = 0, // Success
   CERR_NULLVALUE, // A parameter is NULL
   CERR_SYSTEM, // A system error (malloc...)
-  CERR_FORBIDDEN // A parameter is forbidden (for instance : same list as parameter when calling llist_addall)
+  CERR_FORBIDDEN, // A parameter is forbidden (for instance : same list as parameter when calling llist_addall)
+  CERR_BADINDEX // Bad index (for arraylists)
 } cerr_t;
 
 #ifdef __cplusplus
