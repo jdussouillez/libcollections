@@ -66,6 +66,7 @@ int alist_addv(arraylist_t* list, int nbargs, ...) {
     cerrno = CERR_NULLVALUE;
     return 0;
   }
+  return -1;
 }
 
 void alist_clear(arraylist_t* list) {
@@ -80,6 +81,7 @@ arraylist_t* alist_clone(arraylist_t* list) {
     cerrno = CERR_NULLVALUE;
     return NULL;
   }
+  return NULL;
 }
 
 int alist_cmp(arraylist_t* l1, arraylist_t* l2, comparefct_t compare) {
