@@ -9,7 +9,7 @@
     void* data;				   \
     int i;				   \
     for (i = 0; i < alistp->size; i++) {   \
-      data = ALIST_INDEXOF(alistp, i);	   \
+      data = alistp->data[i];		   \
       instrs;				   \
     }					   \
   } while (0)
@@ -22,7 +22,7 @@ extern "C" {
 typedef struct {
   int size; // Size of the array list
   int data_size; // Size of the elements in byte
-  void* data; // Array of data
+  void** data; // Array of data
 } arraylist_t;
 
 /*
@@ -218,7 +218,6 @@ void* alist_toarray(arraylist_t* list);
  * On error, returns NULL and "cerrno" is set appropriately.
  */
 char* alist_tostring(arraylist_t* list, tostringfct_t tostring);
-
 
 #ifdef __cplusplus
 }

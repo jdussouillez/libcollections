@@ -974,10 +974,10 @@ void arraylist_get_TTP() {
   alist_addv(alist, 2, &i, &j);
   // alist = [1, 2]
   // Get 1st element
-  CU_ASSERT_EQUAL(alist_get(alist, 0), &i);
+  CU_ASSERT_EQUAL(*((int*)alist_get(alist, 0)), i);
   CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
   // Get 2sd element
-  CU_ASSERT_EQUAL(alist_get(alist, 1), &j);
+  CU_ASSERT_EQUAL(*((int*)alist_get(alist, 1)), j);
   CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
   alist_destroy(&alist);
 }
@@ -1244,9 +1244,11 @@ void arraylist_add_TTF() {
   i = 1;
   CU_ASSERT_FALSE(alist_add(NULL, &i));
   CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
+  CU_ASSERT_EQUAL(alist->size, 0);
   // Both parameters are NULL
   CU_ASSERT_FALSE(alist_add(NULL, NULL));
   CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
+  CU_ASSERT_EQUAL(alist->size, 0);
   alist_destroy(&alist);
 }
 
@@ -1282,9 +1284,9 @@ void arraylist_addat_TTF() {
   CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
   // Not valid index (size of list = 0)
   CU_ASSERT_FALSE(alist_addat(alist, -1, &i));
-  CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
+  CU_ASSERT_EQUAL(cerrno, CERR_BADINDEX);
   CU_ASSERT_FALSE(alist_addat(alist, 3, &i));
-  CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
+  CU_ASSERT_EQUAL(cerrno, CERR_BADINDEX);
   alist_destroy(&alist);
 }
 
@@ -1400,13 +1402,13 @@ void arraylist_indexof_TTF() {
   alist = alist_new(size_int);
   // NULL list
   i = 1;
-  CU_ASSERT_EQUAL(alist_indexof(NULL, &i, compare_int), NULL);
+  CU_ASSERT_EQUAL(alist_indexof(NULL, &i, compare_int), -1);
   CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
   // NULL element
-  CU_ASSERT_EQUAL(alist_indexof(alist, NULL, compare_int), NULL);
+  CU_ASSERT_EQUAL(alist_indexof(alist, NULL, compare_int), -1);
   CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
   // element not in the list
-  CU_ASSERT_EQUAL(alist_indexof(alist, &i, compare_int), NULL);
+  CU_ASSERT_EQUAL(alist_indexof(alist, &i, compare_int), -1);
   CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
   alist_destroy(&alist);
 }
@@ -1552,10 +1554,10 @@ int main(void) {
       CU_add_test(pSuite, "linkedlist_remove_TTF", linkedlist_remove_TTF) == NULL ||
       CU_add_test(pSuite, "linkedlist_removeall_TTP", linkedlist_removeall_TTP) == NULL ||
       CU_add_test(pSuite, "linkedlist_removeall_TTF", linkedlist_removeall_TTF) == NULL ||
-      CU_add_test(pSuite, "linkedlist_removefirst_TTP", linkedlist_removeall_TTP) == NULL ||
-      CU_add_test(pSuite, "linkedlist_removefirst_TTF", linkedlist_removeall_TTF) == NULL ||
-      CU_add_test(pSuite, "linkedlist_removelast_TTP", linkedlist_removeall_TTP) == NULL ||
-      CU_add_test(pSuite, "linkedlist_removelast_TTF", linkedlist_removeall_TTF) == NULL ||
+      CU_add_test(pSuite, "linkedlist_removefirst_TTP", linkedlist_removefirst_TTP) == NULL ||
+      CU_add_test(pSuite, "linkedlist_removefirst_TTF", linkedlist_removefirst_TTF) == NULL ||
+      CU_add_test(pSuite, "linkedlist_removelast_TTP", linkedlist_removelast_TTP) == NULL ||
+      CU_add_test(pSuite, "linkedlist_removelast_TTF", linkedlist_removelast_TTF) == NULL ||
       CU_add_test(pSuite, "linkedlist_sort_TTP", linkedlist_sort_TTP) == NULL ||
       CU_add_test(pSuite, "linkedlist_sort_TTF", linkedlist_sort_TTF) == NULL ||
       CU_add_test(pSuite, "linkedlist_toarray_TTP", linkedlist_toarray_TTP) == NULL ||
@@ -1576,50 +1578,50 @@ int main(void) {
     CU_cleanup_registry();
     return CU_get_error();
   }
-  if (//CU_add_test(pSuite, "arraylist_new_destroy_TTP", arraylist_new_destroy_TTP) == NULL ||
-      //CU_add_test(pSuite, "arraylist_destroy_TTF", arraylist_destroy_TTF) == NULL ||
-      //CU_add_test(pSuite, "arraylist_add_TTP", arraylist_add_TTP) == NULL ||
-      //CU_add_test(pSuite, "arraylist_add_TTF", arraylist_add_TTF) == NULL ||
-      //CU_add_test(pSuite, "arraylist_addv_TTP", arraylist_addv_TTP) == NULL ||
-      //CU_add_test(pSuite, "arraylist_addv_TTF", arraylist_addv_TTF) == NULL ||
-      //CU_add_test(pSuite, "arraylist_addall_TTP", arraylist_addall_TTP) == NULL ||
-      //CU_add_test(pSuite, "arraylist_addall_TTF", arraylist_addall_TTF) == NULL ||
-      //CU_add_test(pSuite, "arraylist_addat_TTP", arraylist_addat_TTP) == NULL ||
-      //CU_add_test(pSuite, "arraylist_addat_TTF", arraylist_addat_TTF) == NULL ||
-      //CU_add_test(pSuite, "arraylist_addfirst_TTP", arraylist_addfirst_TTP) == NULL ||
-      //CU_add_test(pSuite, "arraylist_addfirst_TTF", arraylist_addfirst_TTF) == NULL ||
-      //CU_add_test(pSuite, "arraylist_clear_TTP", arraylist_clear_TTP) == NULL ||
-      //CU_add_test(pSuite, "arraylist_clear_TTF", arraylist_clear_TTF) == NULL ||
-      //CU_add_test(pSuite, "arraylist_clone_TTP", arraylist_clone_TTP) == NULL ||
-      //CU_add_test(pSuite, "arraylist_clone_TTF", arraylist_clone_TTF) == NULL ||
-      //CU_add_test(pSuite, "arraylist_cmp_TTP", arraylist_cmp_TTP) == NULL ||
-      //CU_add_test(pSuite, "arraylist_cmp_TTF", arraylist_cmp_TTF) == NULL ||
-      //CU_add_test(pSuite, "arraylist_contains_TTP", arraylist_contains_TTP) == NULL ||
-      //CU_add_test(pSuite, "arraylist_contains_TTF", arraylist_contains_TTF) == NULL ||
-      //CU_add_test(pSuite, "arraylist_count_TTP", arraylist_count_TTP) == NULL ||
-      //CU_add_test(pSuite, "arraylist_count_TTF", arraylist_count_TTF) == NULL ||
-      //CU_add_test(pSuite, "arraylist_finddup_TTP", arraylist_finddup_TTP) == NULL ||
-      //CU_add_test(pSuite, "arraylist_finddup_TTF", arraylist_finddup_TTF) == NULL ||
+  if (CU_add_test(pSuite, "arraylist_new_destroy_TTP", arraylist_new_destroy_TTP) == NULL ||
+      CU_add_test(pSuite, "arraylist_destroy_TTF", arraylist_destroy_TTF) == NULL ||
+      CU_add_test(pSuite, "arraylist_add_TTP", arraylist_add_TTP) == NULL ||
+      CU_add_test(pSuite, "arraylist_add_TTF", arraylist_add_TTF) == NULL ||
+      CU_add_test(pSuite, "arraylist_addv_TTP", arraylist_addv_TTP) == NULL ||
+      CU_add_test(pSuite, "arraylist_addv_TTF", arraylist_addv_TTF) == NULL ||
+      CU_add_test(pSuite, "arraylist_addall_TTP", arraylist_addall_TTP) == NULL ||
+      CU_add_test(pSuite, "arraylist_addall_TTF", arraylist_addall_TTF) == NULL ||
+      CU_add_test(pSuite, "arraylist_addat_TTP", arraylist_addat_TTP) == NULL ||
+      CU_add_test(pSuite, "arraylist_addat_TTF", arraylist_addat_TTF) == NULL ||
+      CU_add_test(pSuite, "arraylist_addfirst_TTP", arraylist_addfirst_TTP) == NULL ||
+      CU_add_test(pSuite, "arraylist_addfirst_TTF", arraylist_addfirst_TTF) == NULL ||
+      CU_add_test(pSuite, "arraylist_clear_TTP", arraylist_clear_TTP) == NULL ||
+      CU_add_test(pSuite, "arraylist_clear_TTF", arraylist_clear_TTF) == NULL ||
+      CU_add_test(pSuite, "arraylist_clone_TTP", arraylist_clone_TTP) == NULL ||
+      CU_add_test(pSuite, "arraylist_clone_TTF", arraylist_clone_TTF) == NULL ||
+      CU_add_test(pSuite, "arraylist_cmp_TTP", arraylist_cmp_TTP) == NULL ||
+      CU_add_test(pSuite, "arraylist_cmp_TTF", arraylist_cmp_TTF) == NULL ||
+      CU_add_test(pSuite, "arraylist_contains_TTP", arraylist_contains_TTP) == NULL ||
+      CU_add_test(pSuite, "arraylist_contains_TTF", arraylist_contains_TTF) == NULL ||
+      CU_add_test(pSuite, "arraylist_count_TTP", arraylist_count_TTP) == NULL ||
+      CU_add_test(pSuite, "arraylist_count_TTF", arraylist_count_TTF) == NULL ||
+      CU_add_test(pSuite, "arraylist_finddup_TTP", arraylist_finddup_TTP) == NULL ||
+      CU_add_test(pSuite, "arraylist_finddup_TTF", arraylist_finddup_TTF) == NULL ||
       //CU_add_test(pSuite, "arraylist_fromarray_TTP", arraylist_fromarray_TTP) == NULL ||
       //CU_add_test(pSuite, "arraylist_fromarray_TTF", arraylist_fromarray_TTF) == NULL ||
-      //CU_add_test(pSuite, "arraylist_get_TTP", arraylist_get_TTP) == NULL ||
-      //CU_add_test(pSuite, "arraylist_get_TTF", arraylist_get_TTF) == NULL ||
-      //CU_add_test(pSuite, "arraylist_indexof_TTP", arraylist_indexof_TTP) == NULL ||
-      //CU_add_test(pSuite, "arraylist_indexof_TTF", arraylist_indexof_TTF) == NULL ||
-      //CU_add_test(pSuite, "arraylist_issorted_TTP", arraylist_issorted_TTP) == NULL ||
-      //CU_add_test(pSuite, "arraylist_issorted_TTF", arraylist_issorted_TTF) == NULL ||
-      //CU_add_test(pSuite, "arraylist_peekfirst_TTP", arraylist_peekfirst_TTP) == NULL ||
-      //CU_add_test(pSuite, "arraylist_peekfirst_TTF", arraylist_peekfirst_TTF) == NULL ||
-      //CU_add_test(pSuite, "arraylist_peeklast_TTP", arraylist_peeklast_TTP) == NULL ||
-      //CU_add_test(pSuite, "arraylist_peeklast_TTF", arraylist_peeklast_TTF) == NULL ||
+      CU_add_test(pSuite, "arraylist_get_TTP", arraylist_get_TTP) == NULL ||
+      CU_add_test(pSuite, "arraylist_get_TTF", arraylist_get_TTF) == NULL ||
+      CU_add_test(pSuite, "arraylist_indexof_TTP", arraylist_indexof_TTP) == NULL ||
+      CU_add_test(pSuite, "arraylist_indexof_TTF", arraylist_indexof_TTF) == NULL ||
+      CU_add_test(pSuite, "arraylist_issorted_TTP", arraylist_issorted_TTP) == NULL ||
+      CU_add_test(pSuite, "arraylist_issorted_TTF", arraylist_issorted_TTF) == NULL ||
+      CU_add_test(pSuite, "arraylist_peekfirst_TTP", arraylist_peekfirst_TTP) == NULL ||
+      CU_add_test(pSuite, "arraylist_peekfirst_TTF", arraylist_peekfirst_TTF) == NULL ||
+      CU_add_test(pSuite, "arraylist_peeklast_TTP", arraylist_peeklast_TTP) == NULL ||
+      CU_add_test(pSuite, "arraylist_peeklast_TTF", arraylist_peeklast_TTF) == NULL ||
       //CU_add_test(pSuite, "arraylist_remove_TTP", arraylist_remove_TTP) == NULL ||
       //CU_add_test(pSuite, "arraylist_remove_TTF", arraylist_remove_TTF) == NULL ||
       //CU_add_test(pSuite, "arraylist_removeall_TTP", arraylist_removeall_TTP) == NULL ||
       //CU_add_test(pSuite, "arraylist_removeall_TTF", arraylist_removeall_TTF) == NULL ||
-      //CU_add_test(pSuite, "arraylist_removefirst_TTP", arraylist_removeall_TTP) == NULL ||
-      //CU_add_test(pSuite, "arraylist_removefirst_TTF", arraylist_removeall_TTF) == NULL ||
-      //CU_add_test(pSuite, "arraylist_removelast_TTP", arraylist_removeall_TTP) == NULL ||
-      //CU_add_test(pSuite, "arraylist_removelast_TTF", arraylist_removeall_TTF) == NULL ||
+      //CU_add_test(pSuite, "arraylist_removefirst_TTP", arraylist_removefirst_TTP) == NULL ||
+      //CU_add_test(pSuite, "arraylist_removefirst_TTF", arraylist_removefirst_TTF) == NULL ||
+      CU_add_test(pSuite, "arraylist_removelast_TTP", arraylist_removelast_TTP) == NULL ||
+      CU_add_test(pSuite, "arraylist_removelast_TTF", arraylist_removelast_TTF) == NULL ||
       //CU_add_test(pSuite, "arraylist_sort_TTP", arraylist_sort_TTP) == NULL ||
       //CU_add_test(pSuite, "arraylist_sort_TTF", arraylist_sort_TTF) == NULL ||
       //CU_add_test(pSuite, "arraylist_toarray_TTP", arraylist_toarray_TTP) == NULL ||
