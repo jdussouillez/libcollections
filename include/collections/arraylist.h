@@ -3,8 +3,6 @@
 
 #include "collections/core.h"
 
-#define ALIST_INDEXOF(alistp, index) ((alistp) + ((index) * alistp->data_size))
-
 #define ALIST_FOREACH(alistp, instrs) do { \
     void* data;				   \
     int i;				   \
