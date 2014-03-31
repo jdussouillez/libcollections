@@ -157,13 +157,15 @@ arraylist_t* alist_new(size_t data_size);
 
 /*
  * Retrieves, but does not remove, the first element of the list.
- * Returns NULL if the list is empty.
+ * On success, returns the first element of the list.
+ * On error, returns NULL and "cerrno" is set appropriately.
  */
 void* alist_peekfirst(arraylist_t* list);
 
 /*
  * Retrieves, but does not remove, the last element of the list.
- * Returns NULL if the list is empty.
+ * On success, returns the last element of the list.
+ * On error, returns NULL and "cerrno" is set appropriately.
  */
 void* alist_peeklast(arraylist_t* list);
 
@@ -228,10 +230,10 @@ void* alist_toarray(arraylist_t* list);
 
 /*
  * Returns a string describing the list.
- * The format is [elem1, elem2, elem3], where elem3
+ * The format is [elem1, elem2, elem3], where elemX
  * is a string returned by the function tostring(). The tostring function must returned an
  * pointer to a memory allocated with malloc(3) (the memory is freed in llist_tostring with free(3)).
- * The maximum length of the returned string is BUFSIZE (defined in core.h).
+ * The maximum length of the returned string is CBUFSIZE (defined in core.h).
  * On error, returns NULL and "cerrno" is set appropriately.
  */
 char* alist_tostring(arraylist_t* list, tostringfct_t tostring);
