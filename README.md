@@ -26,5 +26,5 @@ Tools
 -----
 
 - Written with Emacs 24
-- Built with gcc 4.8
+- Built with gcc 4.8, tests run by CUnit 2.1-0
 - Tested on GNU/Linux (Linux Mint 16)
