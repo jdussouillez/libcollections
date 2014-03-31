@@ -8,19 +8,9 @@
 
 // TODO: add function "setat(list, index, e)"
 
-static int _alist_remove(arraylist_t* list, void* e, comparefct_t compare, int removeall) {
-  int cpt = 0;
-  if (list == NULL || e == NULL || compare == NULL) {
-    cerrno = CERR_NULLVALUE;
-    return 0;
-  }
-  // TODO
-  return cpt;
-}
-
 static void _shift_left(arraylist_t* list, int index) {
   int i;
-  for (i = index; i < list->size - 2; i++) {
+  for (i = index; i < list->size - 1; i++) {
     memmove(list->data[i], list->data[i + 1], list->data_size);
   }
 }
@@ -246,7 +236,7 @@ arraylist_t* alist_fromarray(void* array, int size, size_t data_size) {
     }
   }
   cerrno = CERR_SUCCESS;
-  return NULL;
+  return list;
 }
 
 void* alist_get(arraylist_t* list, int index) {
@@ -329,27 +319,80 @@ void* alist_peeklast(arraylist_t* list) {
 }
 
 int alist_remove(arraylist_t* list, void* e, comparefct_t compare) {
-  return _alist_remove(list, e, compare, 0);
+  int index;
+  if (list == NULL || e == NULL || compare == NULL) {
+    cerrno = CERR_NULLVALUE;
+    return -1;
+  }
+  if ((index = alist_indexof(list, e, compare)) == -1)
+    return 0;
+  return alist_removeat(list, index);
 }
 
 int alist_removeall(arraylist_t* list, void* e, comparefct_t compare) {
-  return _alist_remove(list, e, compare, 1);
+  int i, cpt = 0;
+  arraylist_t* tmp;
+  if (list == NULL || e == NULL || compare == NULL) {
+    cerrno = CERR_NULLVALUE;
+    return -1;
+  }
+  // Create a copy of the list
+  if ((tmp = alist_clone(list)) == NULL)
+    return -1;
+  // Clear the list and add only the elements different from e
+  alist_clear(list);
+  for (i = 0; i < tmp->size; i++) {
+    if (((compare == NULL) ?
+	 memcmp(tmp->data[i], e, tmp->data_size) :
+	 compare(tmp->data[i], e)) != 0) {
+      if (!alist_add(list, tmp->data[i])) {
+	return -1;
+      }
+    }
+    else {
+      cpt++;
+    }
+  }
+  alist_destroy(&tmp);
+  cerrno = CERR_SUCCESS;
+  return cpt;
 }
 
-int alist_removefirst(arraylist_t* list) {
-  void* e = malloc(list->data_size);
+int alist_removeat(arraylist_t* list, int index) {
   if (list == NULL) {
     cerrno = CERR_NULLVALUE;
     return -1;
   }
+  if (index < 0 || index >= list->size) {
+    cerrno = CERR_BADINDEX;
+    return -1;
+  }
+  if (list->size == 1) {
+    free(list->data[index]);
+    free(list->data);
+    list->data = NULL;
+  }
+  else {
+    // Shift elements to the left (-1), then remove the last element.
+    _shift_left(list, index);
+    free(list->data[list->size - 1]);
+    list->data = realloc(list->data, (list->size - 1) * sizeof(void*));
+    if (list->data == NULL) {
+      cerrno = CERR_SYSTEM;
+      return -1;
+    }
+  }
   cerrno = CERR_SUCCESS;
-  if (list->size == 0)
-    return 0;
-  memmove(e, list->data, list->data_size);
-  _shift_left(list, 0);
-  free(e);
   list->size--;
   return 1;
+}
+
+int alist_removefirst(arraylist_t* list) {
+  if (list == NULL) {
+    cerrno = CERR_NULLVALUE;
+    return -1;
+  }
+  return (list->size == 0) ? 0 : alist_removeat(list, 0);
 }
 
 int alist_removelast(arraylist_t* list) {
@@ -357,42 +400,80 @@ int alist_removelast(arraylist_t* list) {
     cerrno = CERR_NULLVALUE;
     return -1;
   }
-  cerrno = CERR_SUCCESS;
-  if (list->size == 0)
-    return 0;
-  free(list->data[list->size - 1]);
-  list->data = realloc(list->data, (list->data_size - 1) * sizeof(void*));
-  if (list->data == NULL) {
-    cerrno = CERR_SYSTEM;
-    return -1;
-  }
-  list->size--;
-  return 1;
+  return (list->size == 0) ? 0 : alist_removeat(list, list->size - 1);
 }
 
 int alist_sort(arraylist_t* list, comparefct_t compare) {
+  void* tmp_array;
+  int i, size;
   if (list == NULL || compare == NULL) {
     cerrno = CERR_NULLVALUE;
     return 0;
   }
-  // TODO
-  return -1;
+  if (list->size > 0) {
+    // Export values in an array
+    tmp_array = alist_toarray(list);
+    if (tmp_array == NULL) {
+      return 0;
+    }
+    // Sort the array
+    qsort(tmp_array, list->size, list->data_size, (__compar_fn_t)compare);
+    // Clear the list and add the element of the array in the list
+    size = list->size;
+    alist_clear(list);
+    for (i = 0; i < size; i++) {
+      if (!alist_add(list, (tmp_array + (i * list->data_size)))) {
+	free(tmp_array);
+	return 0;
+      }
+    }
+    free(tmp_array);
+  }
+  cerrno = CERR_SUCCESS;
+  return 1;
 }
 
 void* alist_toarray(arraylist_t* list) {
+  void* array = NULL;
+  int i;
   if (list == NULL) {
     cerrno = CERR_NULLVALUE;
     return NULL;
   }
-  // TODO
-  return NULL;
+  if ((array = malloc(list->size * list->data_size)) == NULL) {
+    cerrno = CERR_SYSTEM;
+    return NULL;
+  }
+  for (i = 0; i < list->size; i++) {
+    memcpy(array + (i * list->data_size), list->data[i], list->data_size);
+  }
+  cerrno = CERR_SUCCESS;
+  return array;
 }
 
 char* alist_tostring(arraylist_t* list, tostringfct_t tostring) {
+  char *strlist, *strelem;
+  int i, bufsize = CBUFSIZE * sizeof(char);
   if (list == NULL || tostring == NULL) {
     cerrno = CERR_NULLVALUE;
     return NULL;
   }
-  // TODO
-  return NULL;
+  if ((strlist = malloc(bufsize)) == NULL) {
+    cerrno = CERR_SYSTEM;
+    return NULL;
+  }
+  memset(strlist, 0, bufsize);
+  strncpy(strlist, "[", bufsize - strlen(strlist) - 1);
+  for (i = 0; i < list->size; i++) {
+    if ((strelem = tostring(list->data[i])) != NULL) {
+      strncat(strlist, strelem, bufsize - strlen(strlist) - 1);
+      free(strelem);
+      if (i < list->size - 1)
+	strncat(strlist, ", ", bufsize - strlen(strlist) - 1);
+    }
+  }
+  strncat(strlist, "]", bufsize - strlen(strlist) - 1);
+  cerrno = CERR_SUCCESS;
+  return strlist;
 }
+

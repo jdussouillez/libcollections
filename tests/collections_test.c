@@ -1104,6 +1104,43 @@ void arraylist_removeall_TTP() {
   alist_destroy(&alist);
 }
 
+void arraylist_removeat_TTP() {
+  alist = alist_new(size_int);
+  i = 2;
+  alist_add(alist, &i);
+  i = 4;
+  alist_add(alist, &i);
+  i = 6;
+  alist_add(alist, &i);
+  i = 8;
+  alist_add(alist, &i);
+  i = 10;
+  alist_add(alist, &i);
+  // list = [2, 4, 6, 8, 10] --> list = [2, 4, 6, 8]
+  CU_ASSERT_TRUE(alist_removeat(alist, 4));
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  CU_ASSERT_EQUAL(alist->size, 4);
+  i = 2;
+  CU_ASSERT_EQUAL(compare_int(alist->data[0], &i), 0);
+  i = 4;
+  CU_ASSERT_EQUAL(compare_int(alist->data[1], &i), 0);
+  i = 6;
+  CU_ASSERT_EQUAL(compare_int(alist->data[2], &i), 0);
+  i = 8;
+  CU_ASSERT_EQUAL(compare_int(alist->data[3], &i), 0);
+  // list = [2, 4, 6, 8] --> list = [2, 6, 8]
+  CU_ASSERT_TRUE(alist_removeat(alist, 1));
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  CU_ASSERT_EQUAL(alist->size, 3);
+  i = 2;
+  CU_ASSERT_EQUAL(compare_int(alist->data[0], &i), 0);
+  i = 6;
+  CU_ASSERT_EQUAL(compare_int(alist->data[1], &i), 0);
+  i = 8;
+  CU_ASSERT_EQUAL(compare_int(alist->data[2], &i), 0);
+  alist_destroy(&alist);
+}
+
 void arraylist_removefirst_TTP() {
   alist = alist_new(size_int);
   // On an empty list
@@ -1125,7 +1162,7 @@ void arraylist_removelast_TTP() {
   // On an empty list
   CU_ASSERT_EQUAL(alist_removelast(alist), 0);
   CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
-  // On a non-empty list
+  // On a non-empty list [1, 2]
   i = 1;
   alist_add(alist, &i);
   i = 2;
@@ -1140,15 +1177,16 @@ void arraylist_removelast_TTP() {
 void arraylist_sort_TTP() {
   alist = alist_new(size_int);
   // Sort an empty list
-  CU_ASSERT_EQUAL(alist_sort(alist, compare_int), 1);
+  CU_ASSERT_TRUE(alist_sort(alist, compare_int));
   CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
   // Already sorted, alist = [1, 2] --> alist = [1, 2]
   i = 1;
   alist_add(alist, &i);
   i = 2;
   alist_add(alist, &i);
-  CU_ASSERT_EQUAL(alist_sort(alist, compare_int), 1);
+  CU_ASSERT_TRUE(alist_sort(alist, compare_int));
   CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  CU_ASSERT_EQUAL(alist->size, 2);
   CU_ASSERT_EQUAL(compare_int(alist_peeklast(alist), &i), 0);
   i = 1;
   CU_ASSERT_EQUAL(compare_int(alist_peekfirst(alist), &i), 0);
@@ -1161,6 +1199,7 @@ void arraylist_sort_TTP() {
   alist_add(alist, &i);
   CU_ASSERT_EQUAL(alist_sort(alist, compare_int), 1);
   CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  CU_ASSERT_EQUAL(alist->size, 5);
   CU_ASSERT_TRUE(alist_issorted(alist, compare_int));
   alist_destroy(&alist);
 }
@@ -1456,6 +1495,26 @@ void arraylist_removeall_TTF() {
   alist_destroy(&alist);
 }
 
+void arraylist_removeat_TTF() {
+  i = 1;
+  alist = alist_new(size_int);
+  // NULL list
+  CU_ASSERT_EQUAL(alist_removeat(NULL, 1), -1);
+  CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
+  // Bad index
+  i = 2;
+  alist_add(alist, &i);
+  i = 4;
+  alist_add(alist, &i);
+  i = 6;
+  alist_add(alist, &i);
+  CU_ASSERT_EQUAL(alist_removeat(alist, -2), -1);
+  CU_ASSERT_EQUAL(cerrno, CERR_BADINDEX);
+  CU_ASSERT_EQUAL(alist_removeat(alist, 4), -1);
+  CU_ASSERT_EQUAL(cerrno, CERR_BADINDEX);
+  alist_destroy(&alist);
+}
+
 void arraylist_removefirst_TTF() {
   // NULL list
   CU_ASSERT_EQUAL(alist_removefirst(NULL), -1);
@@ -1602,8 +1661,8 @@ int main(void) {
       CU_add_test(pSuite, "arraylist_count_TTF", arraylist_count_TTF) == NULL ||
       CU_add_test(pSuite, "arraylist_finddup_TTP", arraylist_finddup_TTP) == NULL ||
       CU_add_test(pSuite, "arraylist_finddup_TTF", arraylist_finddup_TTF) == NULL ||
-      //CU_add_test(pSuite, "arraylist_fromarray_TTP", arraylist_fromarray_TTP) == NULL ||
-      //CU_add_test(pSuite, "arraylist_fromarray_TTF", arraylist_fromarray_TTF) == NULL ||
+      CU_add_test(pSuite, "arraylist_fromarray_TTP", arraylist_fromarray_TTP) == NULL ||
+      CU_add_test(pSuite, "arraylist_fromarray_TTF", arraylist_fromarray_TTF) == NULL ||
       CU_add_test(pSuite, "arraylist_get_TTP", arraylist_get_TTP) == NULL ||
       CU_add_test(pSuite, "arraylist_get_TTF", arraylist_get_TTF) == NULL ||
       CU_add_test(pSuite, "arraylist_indexof_TTP", arraylist_indexof_TTP) == NULL ||
@@ -1614,21 +1673,22 @@ int main(void) {
       CU_add_test(pSuite, "arraylist_peekfirst_TTF", arraylist_peekfirst_TTF) == NULL ||
       CU_add_test(pSuite, "arraylist_peeklast_TTP", arraylist_peeklast_TTP) == NULL ||
       CU_add_test(pSuite, "arraylist_peeklast_TTF", arraylist_peeklast_TTF) == NULL ||
-      //CU_add_test(pSuite, "arraylist_remove_TTP", arraylist_remove_TTP) == NULL ||
-      //CU_add_test(pSuite, "arraylist_remove_TTF", arraylist_remove_TTF) == NULL ||
-      //CU_add_test(pSuite, "arraylist_removeall_TTP", arraylist_removeall_TTP) == NULL ||
-      //CU_add_test(pSuite, "arraylist_removeall_TTF", arraylist_removeall_TTF) == NULL ||
-      //CU_add_test(pSuite, "arraylist_removefirst_TTP", arraylist_removefirst_TTP) == NULL ||
-      //CU_add_test(pSuite, "arraylist_removefirst_TTF", arraylist_removefirst_TTF) == NULL ||
+      CU_add_test(pSuite, "arraylist_remove_TTP", arraylist_remove_TTP) == NULL ||
+      CU_add_test(pSuite, "arraylist_remove_TTF", arraylist_remove_TTF) == NULL ||
+      CU_add_test(pSuite, "arraylist_removeat_TTP", arraylist_removeat_TTP) == NULL ||
+      CU_add_test(pSuite, "arraylist_removeat_TTF", arraylist_removeat_TTF) == NULL ||
+      CU_add_test(pSuite, "arraylist_removeall_TTP", arraylist_removeall_TTP) == NULL ||
+      CU_add_test(pSuite, "arraylist_removeall_TTF", arraylist_removeall_TTF) == NULL ||
+      CU_add_test(pSuite, "arraylist_removefirst_TTP", arraylist_removefirst_TTP) == NULL ||
+      CU_add_test(pSuite, "arraylist_removefirst_TTF", arraylist_removefirst_TTF) == NULL ||
       CU_add_test(pSuite, "arraylist_removelast_TTP", arraylist_removelast_TTP) == NULL ||
       CU_add_test(pSuite, "arraylist_removelast_TTF", arraylist_removelast_TTF) == NULL ||
-      //CU_add_test(pSuite, "arraylist_sort_TTP", arraylist_sort_TTP) == NULL ||
-      //CU_add_test(pSuite, "arraylist_sort_TTF", arraylist_sort_TTF) == NULL ||
-      //CU_add_test(pSuite, "arraylist_toarray_TTP", arraylist_toarray_TTP) == NULL ||
-      //CU_add_test(pSuite, "arraylist_toarray_TTF", arraylist_toarray_TTF) == NULL ||
-      //CU_add_test(pSuite, "arraylist_tostring_TTP", arraylist_tostring_TTP) == NULL ||
-      //CU_add_test(pSuite, "arraylist_tostring_TTF", arraylist_tostring_TTF) == NULL) {
-      0) {
+      CU_add_test(pSuite, "arraylist_sort_TTP", arraylist_sort_TTP) == NULL ||
+      CU_add_test(pSuite, "arraylist_sort_TTF", arraylist_sort_TTF) == NULL ||
+      CU_add_test(pSuite, "arraylist_toarray_TTP", arraylist_toarray_TTP) == NULL ||
+      CU_add_test(pSuite, "arraylist_toarray_TTF", arraylist_toarray_TTF) == NULL ||
+      CU_add_test(pSuite, "arraylist_tostring_TTP", arraylist_tostring_TTP) == NULL ||
+      CU_add_test(pSuite, "arraylist_tostring_TTF", arraylist_tostring_TTF) == NULL) {
     CU_cleanup_registry();
     return CU_get_error();
   }
@@ -1643,3 +1703,4 @@ int main(void) {
   CU_cleanup_registry();
   return num_failures;
 }
+

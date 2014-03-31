@@ -180,6 +180,14 @@ int alist_remove(arraylist_t* list, void* e, comparefct_t compare);
 int alist_removeall(arraylist_t* list, void* e, comparefct_t compare);
 
 /*
+ * Removes the element at the specified index.
+ * If "compare" is NULL, the function uses memcmp(3).
+ * On success, returns 1.
+ * On error, -1 is returned and "cerrno" is set appropriately.
+ */
+int alist_removeat(arraylist_t* list, int index);
+
+/*
  * Removes the first element of the list.
  * Returns 1 if the first element is removed, 0 if the list is empty.
  * On error, -1 is returned and "cerrno" is set appropriately.
@@ -189,7 +197,7 @@ int alist_removefirst(arraylist_t* list);
 /*
  * Removes the last element of the list.
  * Returns 1 if the last element is removed, 0 if the list is empty.
- * On error, 0 is returned and "cerrno" is set appropriately.
+ * On error, -1 is returned and "cerrno" is set appropriately.
  */
 int alist_removelast(arraylist_t* list);
 
@@ -222,3 +230,4 @@ char* alist_tostring(arraylist_t* list, tostringfct_t tostring);
 #endif
 
 #endif // ARRAYLIST_H
+
