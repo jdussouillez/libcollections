@@ -458,24 +458,26 @@ void* llist_toarray(linkedlist_t* list) {
 
 char* llist_tostring(linkedlist_t* list, tostringfct_t tostring) {
   char *strlist, *strelem;
+  int bufsize = CBUFSIZE * sizeof(char);
   if (list == NULL || tostring == NULL) {
     cerrno = CERR_NULLVALUE;
     return NULL;
   }
-  if ((strlist = malloc(CBUFSIZE * sizeof(char))) == NULL) {
+  if ((strlist = malloc(bufsize)) == NULL) {
     cerrno = CERR_SYSTEM;
     return NULL;
   }
-  strcpy(strlist, "[");
+  memset(strlist, 0, bufsize);
+  strncpy(strlist, "[", bufsize - strlen(strlist) - 1);
   LLIST_FOREACH(list, {
       if ((strelem = tostring(data)) != NULL) {
-	strcat(strlist, strelem);
+	strncat(strlist, strelem, bufsize - strlen(strlist) - 1);
 	free(strelem);
 	if (node->next != NULL)
 	  strcat(strlist, ", ");
       }
     });
-  strcat(strlist, "]");
+  strncat(strlist, "]", bufsize - strlen(strlist) - 1);
   cerrno = CERR_SUCCESS;
   return strlist;
 }
