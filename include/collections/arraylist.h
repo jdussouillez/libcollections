@@ -25,6 +25,7 @@ typedef struct {
 
 /*
  * Appends the specified element to the end of this list (memory copy).
+ * NULL elements can not be inserted in the list.
  * On success, returns 1. On error, 0 is returned and "cerrno" is set appropriately.
  */
 int alist_add(arraylist_t* list, void* e);
@@ -38,12 +39,14 @@ int alist_addall(arraylist_t* dest, arraylist_t* src);
 
 /*
  * Inserts the specified element "e" at the index "index" in the list (memory copy).
+ * NULL elements are not allowed.
  * On success, returns 1. On error, 0 is returned and "cerrno" is set appropriately.
  */
 int alist_addat(arraylist_t *list, int index, void* e);
 
 /*
  * Inserts the specified element at the beginning of this list (memory copy).
+ * NULL elements are not allowed.
  * On success, returns 1. On error, 0 is returned and "cerrno" is set appropriately.
  */
 int alist_addfirst(arraylist_t* list, void* e);
@@ -52,6 +55,7 @@ int alist_addfirst(arraylist_t* list, void* e);
  * Appends all the elements to the end of the list (memory copy).
  * The second element is the number of arguments after it.
  * Example : alist_addv(list, 3, &i, &j, &k).
+ * NULL elements are not allowed.
  * On success, returns the number of elements added.
  * On error, 0 is returned and "cerrno" is set appropriately.
  */
@@ -200,6 +204,13 @@ int alist_removefirst(arraylist_t* list);
  * On error, -1 is returned and "cerrno" is set appropriately.
  */
 int alist_removelast(arraylist_t* list);
+
+/*
+ * Replaces the element at the specified position in this list with the specified element.
+ * On success, returns the element previously at the specified position.
+ * On error, returns NULL and "cerrno" is set appropriately.
+ */
+void* alist_setat(arraylist_t* list, int index, void* e);
 
 /*
  * Sorts the list (using the quick sort algorithm).

@@ -1174,6 +1174,25 @@ void arraylist_removelast_TTP() {
   alist_destroy(&alist);
 }
 
+void arraylist_setat_TTP() {
+  void* previous;
+  alist = alist_new(size_int);
+  i = 4;
+  alist_add(alist, &i);
+  i = 8;
+  alist_add(alist, &i);
+  // alist = [4, 8] -> alist = [4, 16];
+  i = 16;
+  previous = alist_setat(alist, 1, &i);
+  CU_ASSERT_EQUAL(*((int*) previous), 8);
+  free(previous);
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  CU_ASSERT_EQUAL(alist->size, 2);
+  CU_ASSERT_EQUAL(*((int*) alist->data[0]), 4);
+  CU_ASSERT_EQUAL(*((int*) alist->data[1]), 16);
+  alist_destroy(&alist);
+}
+
 void arraylist_sort_TTP() {
   alist = alist_new(size_int);
   // Sort an empty list
@@ -1527,6 +1546,23 @@ void arraylist_removelast_TTF() {
   CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
 }
 
+void arraylist_setat_TTF() {
+  i = 1;
+  // NULL list
+  CU_ASSERT_PTR_NULL(alist_setat(NULL, 0, &i));
+  CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
+  // NULL element
+  alist = alist_new(size_int);
+  CU_ASSERT_PTR_NULL(alist_setat(alist, 0, NULL));
+  CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
+  // Bad index
+  CU_ASSERT_PTR_NULL(alist_setat(alist, -1, &i));
+  CU_ASSERT_EQUAL(cerrno, CERR_BADINDEX);
+  CU_ASSERT_PTR_NULL(alist_setat(alist, 0, &i));
+  CU_ASSERT_EQUAL(cerrno, CERR_BADINDEX);
+  alist_destroy(&alist);
+}
+
 void arraylist_sort_TTF() {
   // NULL list
   CU_ASSERT_EQUAL(alist_sort(NULL, compare_int), 0);
@@ -1683,6 +1719,8 @@ int main(void) {
       CU_add_test(pSuite, "arraylist_removefirst_TTF", arraylist_removefirst_TTF) == NULL ||
       CU_add_test(pSuite, "arraylist_removelast_TTP", arraylist_removelast_TTP) == NULL ||
       CU_add_test(pSuite, "arraylist_removelast_TTF", arraylist_removelast_TTF) == NULL ||
+      CU_add_test(pSuite, "arraylist_setat_TTP", arraylist_setat_TTP) == NULL ||
+      CU_add_test(pSuite, "arraylist_setat_TTF", arraylist_setat_TTF) == NULL ||
       CU_add_test(pSuite, "arraylist_sort_TTP", arraylist_sort_TTP) == NULL ||
       CU_add_test(pSuite, "arraylist_sort_TTF", arraylist_sort_TTF) == NULL ||
       CU_add_test(pSuite, "arraylist_toarray_TTP", arraylist_toarray_TTP) == NULL ||

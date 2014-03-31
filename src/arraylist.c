@@ -403,6 +403,25 @@ int alist_removelast(arraylist_t* list) {
   return (list->size == 0) ? 0 : alist_removeat(list, list->size - 1);
 }
 
+void* alist_setat(arraylist_t* list, int index, void* e) {
+  void* previous;
+  if (list == NULL || e == NULL) {
+    cerrno = CERR_NULLVALUE;
+    return NULL;
+  }
+  if (index < 0 || index >= list->size) {
+    cerrno = CERR_BADINDEX;
+    return NULL;
+  }
+  if ((previous = malloc(list->data_size)) == NULL) {
+    cerrno = CERR_SYSTEM;
+    return NULL;
+  }
+  memcpy(previous, list->data[index], list->data_size);
+  memcpy(list->data[index], e, list->data_size);
+  return previous;
+}
+
 int alist_sort(arraylist_t* list, comparefct_t compare) {
   void* tmp_array;
   int i, size;
