@@ -1,7 +1,7 @@
 libcollections
 ==============
 
-A static C library that provides generic collections
+A static C library that provides generic collections (inspired by Java collections).
 
 How to build
 ------------
@@ -18,7 +18,7 @@ Collections
 libcollections provides different types of collections (see the samples folder) :
 
 - Linked list
-- // TODO
+- Array list
 
 Have a look to the include file ("include/collections/name_of_collection.h") to see the available functions.
 
