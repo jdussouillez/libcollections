@@ -1810,6 +1810,17 @@ void stack_count_TTP() {
   stack_destroy(&stack);
 }
 
+void stack_empty_TTP() {
+  stack = stack_new(size_int);
+  CU_ASSERT_TRUE(stack_empty(stack));
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  i = 1;
+  stack_add(stack, &i);
+  CU_ASSERT_FALSE(stack_empty(stack));
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  stack_destroy(&stack);
+}
+
 void stack_finddup_TTP() {
   stack_t* dupstack = stack_new(size_int);
   stack = stack_new(size_int);
@@ -1932,6 +1943,28 @@ void stack_peeklast_TTP() {
   stack_add(stack, &i);
   CU_ASSERT_EQUAL(compare_int(stack_peeklast(stack), &i), 0);
   CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  stack_destroy(&stack);
+}
+
+void stack_pop_TTP() {
+  void* val;
+  i = 1;
+  stack = stack_new(size_int);
+  stack_push(stack, &i);
+  val = stack_pop(stack);
+  CU_ASSERT_EQUAL(*((int*) val), 1);
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  free(val);
+  stack_destroy(&stack);
+}
+
+void stack_push_TTP() {
+  i = 7;
+  stack = stack_new(size_int);
+  CU_ASSERT_TRUE(stack_push(stack, &i));
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  CU_ASSERT_EQUAL(stack->size, 1);
+  CU_ASSERT_EQUAL(*((int*) stack->data[0]), 7);
   stack_destroy(&stack);
 }
 
@@ -2309,6 +2342,15 @@ void stack_count_TTF() {
   stack_destroy(&stack);
 }
 
+void stack_empty_TTF() {
+  i = 1;
+  stack = stack_new(size_int);
+  // NULL stack
+  CU_ASSERT_EQUAL(stack_empty(NULL), -1);
+  CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
+  stack_destroy(&stack);
+}
+
 void stack_finddup_TTF() {
   stack_t* dupstack = stack_new(size_int);
   i = 1;
@@ -2375,6 +2417,27 @@ void stack_peeklast_TTF() {
   // NULL stack
   CU_ASSERT_PTR_NULL(stack_peekfirst(NULL));
   CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
+}
+
+void stack_pop_TTF() {
+  i = 1;
+  stack = stack_new(size_int);
+  // NULL stack
+  CU_ASSERT_EQUAL(stack_pop(NULL), NULL);
+  CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
+  stack_destroy(&stack);
+}
+
+void stack_push_TTF() {
+  i = 1;
+  stack = stack_new(size_int);
+  // NULL stack
+  CU_ASSERT_EQUAL(stack_push(NULL, &i), 0);
+  CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
+  // NULL element
+  CU_ASSERT_EQUAL(stack_push(stack, NULL), 0);
+  CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
+  stack_destroy(&stack);
 }
 
 void stack_remove_TTF() {
@@ -2477,9 +2540,6 @@ void stack_tostring_TTF() {
   CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
   stack_destroy(&stack);
 }
-
-
-
 
 
 /*
@@ -2653,6 +2713,8 @@ int main(void) {
       CU_add_test(pSuite, "stack_contains_TTF", stack_contains_TTF) == NULL ||
       CU_add_test(pSuite, "stack_count_TTP", stack_count_TTP) == NULL ||
       CU_add_test(pSuite, "stack_count_TTF", stack_count_TTF) == NULL ||
+      CU_add_test(pSuite, "stack_empty_TTP", stack_empty_TTP) == NULL ||
+      CU_add_test(pSuite, "stack_empty_TTF", stack_empty_TTF) == NULL ||
       CU_add_test(pSuite, "stack_finddup_TTP", stack_finddup_TTP) == NULL ||
       CU_add_test(pSuite, "stack_finddup_TTF", stack_finddup_TTF) == NULL ||
       CU_add_test(pSuite, "stack_fromarray_TTP", stack_fromarray_TTP) == NULL ||
@@ -2667,6 +2729,10 @@ int main(void) {
       CU_add_test(pSuite, "stack_peekfirst_TTF", stack_peekfirst_TTF) == NULL ||
       CU_add_test(pSuite, "stack_peeklast_TTP", stack_peeklast_TTP) == NULL ||
       CU_add_test(pSuite, "stack_peeklast_TTF", stack_peeklast_TTF) == NULL ||
+      CU_add_test(pSuite, "stack_pop_TTP", stack_pop_TTP) == NULL ||
+      CU_add_test(pSuite, "stack_pop_TTF", stack_pop_TTF) == NULL ||
+      CU_add_test(pSuite, "stack_push_TTP", stack_push_TTP) == NULL ||
+      CU_add_test(pSuite, "stack_push_TTF", stack_push_TTF) == NULL ||
       CU_add_test(pSuite, "stack_remove_TTP", stack_remove_TTP) == NULL ||
       CU_add_test(pSuite, "stack_remove_TTF", stack_remove_TTF) == NULL ||
       CU_add_test(pSuite, "stack_removeat_TTP", stack_removeat_TTP) == NULL ||
