@@ -119,6 +119,12 @@ int alist_count(arraylist_t* list, void* e, comparefct_t compare);
 void alist_destroy(arraylist_t** list);
 
 /*
+ * Returns 1 if the list is empty, 0 otherwise.
+ * Returns -1 if the list is NULL and "cerrno" is set appropriately.
+ */
+int alist_empty(arraylist_t* list);
+
+/*
  * Fill the list "duplist" with all the duplicates element in the list.
  * All the elements in "duplist" are removed before the process.
  * If "compare" is NULL, the function uses memcmp(3).
@@ -222,6 +228,12 @@ int alist_removelast(arraylist_t* list);
  * On error, returns 0 and "cerrno" is set appropriately.
  */
 int alist_setat(arraylist_t* list, int index, void* e, void* previous);
+
+/*
+ * Returns the size (number of elements) of the list.
+ * Returns -1 if the list is NULL and "cerrno" is set appropriately.
+ */
+int alist_size(arraylist_t* list);
 
 /*
  * Sorts the list (using the quick sort algorithm).

@@ -218,6 +218,15 @@ void alist_destroy(arraylist_t** list) {
 }
 
 
+int alist_empty(arraylist_t* list) {
+  if (list == NULL) {
+    cerrno = CERR_NULLVALUE;
+    return -1;
+  }
+  return (list->size == 0) ? 1 : 0;
+}
+
+
 int alist_finddup(arraylist_t* list, arraylist_t* duplist, comparefct_t compare) {
   if (list == NULL || duplist == NULL || compare == NULL) {
     cerrno = CERR_NULLVALUE;
@@ -450,6 +459,15 @@ int alist_setat(arraylist_t* list, int index, void* e, void* previous) {
   memcpy(previous, list->data[index], list->data_size);
   memcpy(list->data[index], e, list->data_size);
   return 1;
+}
+
+
+int alist_size(arraylist_t* list) {
+  if (list == NULL) {
+    cerrno = CERR_NULLVALUE;
+    return -1;
+  }
+  return list->size;
 }
 
 

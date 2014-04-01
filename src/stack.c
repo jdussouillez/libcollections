@@ -68,12 +68,7 @@ void stack_destroy(stack_t** stack) {
 
 
 int stack_empty(stack_t* stack) {
-  if (stack == NULL) {
-    cerrno = CERR_NULLVALUE;
-    return -1;
-  }
-  cerrno = CERR_SUCCESS;
-  return (stack->size == 0) ? 1 : 0;
+  return alist_empty(stack);
 }
 
 
@@ -172,6 +167,11 @@ int stack_removelast(stack_t* stack) {
 
 int stack_setat(stack_t* stack, int index, void* e, void* previous) {
   return alist_setat(stack, index, e, previous);
+}
+
+
+int stack_size(stack_t* stack) {
+  return alist_size(stack);
 }
 
 

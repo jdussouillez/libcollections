@@ -217,6 +217,15 @@ void llist_destroy(linkedlist_t** list) {
 }
 
 
+int llist_empty(linkedlist_t* list) {
+  if (list == NULL) {
+    cerrno = CERR_NULLVALUE;
+    return -1;
+  }
+  return (list->size == 0) ? 1 : 0;
+}
+
+
 int llist_finddup(linkedlist_t* list, linkedlist_t* duplist, comparefct_t compare) {
   if (list == NULL || duplist == NULL) {
     cerrno = CERR_NULLVALUE;
@@ -406,6 +415,15 @@ int llist_removelast(linkedlist_t* list) {
   list->tail->next = NULL;
   list->size--;
   return 1;
+}
+
+
+int llist_size(linkedlist_t* list) {
+  if (list == NULL) {
+    cerrno = CERR_NULLVALUE;
+    return -1;
+  }
+  return list->size;
 }
 
 

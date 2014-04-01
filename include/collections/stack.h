@@ -232,6 +232,12 @@ int stack_removelast(stack_t* stack);
 int stack_setat(stack_t* stack, int index, void* e, void* previous);
 
 /*
+ * Returns the size (number of elements) of the stack.
+ * Returns -1 if the list is NULL and "cerrno" is set appropriately.
+ */
+int stack_size(stack_t* stack);
+
+/*
  * Sorts the stack (using the quick sort algorithm).
  * On error, 0 is returned and "cerrno" is set appropriately.
  */

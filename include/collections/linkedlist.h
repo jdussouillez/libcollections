@@ -112,6 +112,12 @@ int llist_count(linkedlist_t* list, void* e, comparefct_t compare);
 void llist_destroy(linkedlist_t** list);
 
 /*
+ * Returns 1 if the list is empty, 0 otherwise.
+ * Returns -1 if the list is NULL and "cerrno" is set appropriately.
+ */
+int llist_empty(linkedlist_t* list);
+
+/*
  * Fill the list "duplist" with all the duplicates element in the list.
  * All the elements in "duplist" are removed before the process.
  * If "compare" is NULL, the function uses memcmp(3).
@@ -185,6 +191,12 @@ int llist_removefirst(linkedlist_t* list);
  * On error, 0 is returned and "cerrno" is set appropriately.
  */
 int llist_removelast(linkedlist_t* list);
+
+/*
+ * Returns the size (number of elements) of the list.
+ * Returns -1 if the list is NULL and "cerrno" is set appropriately.
+ */
+int llist_size(linkedlist_t* list);
 
 /*
  * Sorts the list (using the quick sort algorithm).
