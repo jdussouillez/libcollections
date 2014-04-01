@@ -222,6 +222,7 @@ int llist_empty(linkedlist_t* list) {
     cerrno = CERR_NULLVALUE;
     return -1;
   }
+  cerrno = CERR_SUCCESS;
   return (list->size == 0) ? 1 : 0;
 }
 
@@ -423,6 +424,7 @@ int llist_size(linkedlist_t* list) {
     cerrno = CERR_NULLVALUE;
     return -1;
   }
+  cerrno = CERR_SUCCESS;
   return list->size;
 }
 
