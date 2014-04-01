@@ -61,20 +61,20 @@ void stack_clear(stack_t* stack);
 stack_t* stack_clone(stack_t* stack);
 
 /*
- * Compares the stacks l1 and l2.
+ * Compares the stacks s1 and s2.
  * If the parameters are not valid (NULL value...), returns -1.
  * Compares the data_size of the stacks to check if the elements
  * have the same size. If the size are different, return the difference
- * of the data size (l1->data_size - l2->data_size).
+ * of the data size (s1->data_size - s2->data_size).
  * Then, compares the size (= number of elements) of the stacks. If different,
- * returns the difference of size (l1->size - l2->size).
+ * returns the difference of size (s1->size - s2->size).
  * Then, the function iterates over the elements.
  * If a different element is found (using compare function), returns the returned value
- * of compare(elem_of_l1, elem_of_l2).
+ * of compare(elem_of_s1, elem_of_s2).
  * If "compare" is NULL, the function uses memcmp(3).
  * If the stacks are equals, returns 0.
  */
-int stack_cmp(stack_t* l1, stack_t* l2, comparefct_t compare);
+int stack_cmp(stack_t* s1, stack_t* s2, comparefct_t compare);
 
 /*
  * Check if an element is in the stack using the function "compare".

@@ -47,8 +47,8 @@ stack_t* stack_clone(stack_t* stack) {
 }
 
 
-int stack_cmp(stack_t* l1, stack_t* l2, comparefct_t compare) {
-  return alist_cmp(l1, l2, compare);
+int stack_cmp(stack_t* s1, stack_t* s2, comparefct_t compare) {
+  return alist_cmp(s1, s2, compare);
 }
 
 
