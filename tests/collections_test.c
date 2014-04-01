@@ -225,6 +225,17 @@ void linkedlist_count_TTP() {
   llist_destroy(&llist);
 }
 
+void linkedlist_empty_TTP() {
+  llist = llist_new(size_int);
+  CU_ASSERT_EQUAL(llist_empty(llist), 1);
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  i = 1;
+  llist_add(llist, &i);
+  CU_ASSERT_EQUAL(llist_empty(llist), 0);
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  llist_destroy(&llist);
+}
+
 void linkedlist_finddup_TTP() {
   linkedlist_t* dupllist = llist_new(size_int);
   llist = llist_new(size_int);
@@ -404,6 +415,17 @@ void linkedlist_removelast_TTP() {
   CU_ASSERT_EQUAL(llist->size, 1);
   i = 1;
   CU_ASSERT_EQUAL(compare_int(llist_peeklast(llist), &i), 0);
+  llist_destroy(&llist);
+}
+
+void linkedlist_size_TTP() {
+  llist = llist_new(size_int);
+  CU_ASSERT_EQUAL(llist_size(llist), 0);
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  i = 1;
+  llist_add(llist, &i);
+  CU_ASSERT_EQUAL(llist_size(llist), 1);
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
   llist_destroy(&llist);
 }
 
@@ -611,6 +633,11 @@ void linkedlist_count_TTF() {
   llist_destroy(&llist);
 }
 
+void linkedlist_empty_TTF() {
+  CU_ASSERT_EQUAL(llist_empty(NULL), -1);
+  CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
+}
+
 void linkedlist_finddup_TTF() {
   linkedlist_t* dupllist = llist_new(size_int);
   i = 1;
@@ -683,6 +710,12 @@ void linkedlist_removefirst_TTF() {
 void linkedlist_removelast_TTF() {
   // NULL list
   CU_ASSERT_EQUAL(llist_removelast(NULL), -1);
+  CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
+}
+
+void linkedlist_size_TTF() {
+  // NULL list
+  CU_ASSERT_EQUAL(llist_size(NULL), -1);
   CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
 }
 
@@ -924,6 +957,17 @@ void arraylist_count_TTP() {
   i = 2;
   // The list does not contain an element 2
   CU_ASSERT_EQUAL(alist_count(alist, &i, compare_int), 0);
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  alist_destroy(&alist);
+}
+
+void arraylist_empty_TTP() {
+  alist = alist_new(size_int);
+  CU_ASSERT_EQUAL(alist_empty(alist), 1);
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  i = 1;
+  alist_add(alist, &i);
+  CU_ASSERT_EQUAL(alist_empty(alist), 0);
   CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
   alist_destroy(&alist);
 }
@@ -1198,6 +1242,17 @@ void arraylist_setat_TTP() {
   alist_destroy(&alist);
 }
 
+void arraylist_size_TTP() {
+  alist = alist_new(size_int);
+  CU_ASSERT_EQUAL(alist_size(alist), 0);
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  i = 1;
+  alist_add(alist, &i);
+  CU_ASSERT_EQUAL(alist_size(alist), 1);
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  alist_destroy(&alist);
+}
+
 void arraylist_sort_TTP() {
   alist = alist_new(size_int);
   // Sort an empty list
@@ -1427,6 +1482,11 @@ void arraylist_count_TTF() {
   alist_destroy(&alist);
 }
 
+void arraylist_empty_TTF() {
+  CU_ASSERT_EQUAL(alist_empty(NULL), -1);
+  CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
+}
+
 void arraylist_finddup_TTF() {
   arraylist_t* dupalist = alist_new(size_int);
   i = 1;
@@ -1566,6 +1626,11 @@ void arraylist_setat_TTF() {
   CU_ASSERT_EQUAL(alist_setat(alist, 0, &i, NULL), 0);
   CU_ASSERT_EQUAL(cerrno, CERR_BADINDEX);
   alist_destroy(&alist);
+}
+
+void arraylist_size_TTF() {
+  CU_ASSERT_EQUAL(alist_size(NULL), -1);
+  CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
 }
 
 void arraylist_sort_TTF() {
@@ -2113,6 +2178,17 @@ void stack_setat_TTP() {
   stack_destroy(&stack);
 }
 
+void stack_size_TTP() {
+  stack = stack_new(size_int);
+  CU_ASSERT_EQUAL(stack_size(stack), 0);
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  i = 1;
+  stack_push(stack, &i);
+  CU_ASSERT_EQUAL(stack_size(stack), 1);
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  stack_destroy(&stack);
+}
+
 void stack_sort_TTP() {
   stack = stack_new(size_int);
   // Sort an empty stack
@@ -2343,12 +2419,9 @@ void stack_count_TTF() {
 }
 
 void stack_empty_TTF() {
-  i = 1;
-  stack = stack_new(size_int);
   // NULL stack
   CU_ASSERT_EQUAL(stack_empty(NULL), -1);
   CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
-  stack_destroy(&stack);
 }
 
 void stack_finddup_TTF() {
@@ -2513,6 +2586,11 @@ void stack_setat_TTF() {
   stack_destroy(&stack);
 }
 
+void stack_size_TTF() {
+  CU_ASSERT_EQUAL(stack_size(NULL), -1);
+  CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
+}
+
 void stack_sort_TTF() {
   // NULL stack
   CU_ASSERT_EQUAL(stack_sort(NULL, compare_int), 0);
@@ -2585,6 +2663,8 @@ int main(void) {
       CU_add_test(pSuite, "linkedlist_contains_TTF", linkedlist_contains_TTF) == NULL ||
       CU_add_test(pSuite, "linkedlist_count_TTP", linkedlist_count_TTP) == NULL ||
       CU_add_test(pSuite, "linkedlist_count_TTF", linkedlist_count_TTF) == NULL ||
+      CU_add_test(pSuite, "linkedlist_empty_TTP", linkedlist_empty_TTP) == NULL ||
+      CU_add_test(pSuite, "linkedlist_empty_TTF", linkedlist_empty_TTF) == NULL ||
       CU_add_test(pSuite, "linkedlist_finddup_TTP", linkedlist_finddup_TTP) == NULL ||
       CU_add_test(pSuite, "linkedlist_finddup_TTF", linkedlist_finddup_TTF) == NULL ||
       CU_add_test(pSuite, "linkedlist_fromarray_TTP", linkedlist_fromarray_TTP) == NULL ||
@@ -2603,6 +2683,8 @@ int main(void) {
       CU_add_test(pSuite, "linkedlist_removefirst_TTF", linkedlist_removefirst_TTF) == NULL ||
       CU_add_test(pSuite, "linkedlist_removelast_TTP", linkedlist_removelast_TTP) == NULL ||
       CU_add_test(pSuite, "linkedlist_removelast_TTF", linkedlist_removelast_TTF) == NULL ||
+      CU_add_test(pSuite, "linkedlist_size_TTP", linkedlist_size_TTP) == NULL ||
+      CU_add_test(pSuite, "linkedlist_size_TTF", linkedlist_size_TTF) == NULL ||
       CU_add_test(pSuite, "linkedlist_sort_TTP", linkedlist_sort_TTP) == NULL ||
       CU_add_test(pSuite, "linkedlist_sort_TTF", linkedlist_sort_TTF) == NULL ||
       CU_add_test(pSuite, "linkedlist_toarray_TTP", linkedlist_toarray_TTP) == NULL ||
@@ -2645,6 +2727,8 @@ int main(void) {
       CU_add_test(pSuite, "arraylist_contains_TTF", arraylist_contains_TTF) == NULL ||
       CU_add_test(pSuite, "arraylist_count_TTP", arraylist_count_TTP) == NULL ||
       CU_add_test(pSuite, "arraylist_count_TTF", arraylist_count_TTF) == NULL ||
+      CU_add_test(pSuite, "arraylist_empty_TTP", arraylist_empty_TTP) == NULL ||
+      CU_add_test(pSuite, "arraylist_empty_TTF", arraylist_empty_TTF) == NULL ||
       CU_add_test(pSuite, "arraylist_finddup_TTP", arraylist_finddup_TTP) == NULL ||
       CU_add_test(pSuite, "arraylist_finddup_TTF", arraylist_finddup_TTF) == NULL ||
       CU_add_test(pSuite, "arraylist_fromarray_TTP", arraylist_fromarray_TTP) == NULL ||
@@ -2671,6 +2755,8 @@ int main(void) {
       CU_add_test(pSuite, "arraylist_removelast_TTF", arraylist_removelast_TTF) == NULL ||
       CU_add_test(pSuite, "arraylist_setat_TTP", arraylist_setat_TTP) == NULL ||
       CU_add_test(pSuite, "arraylist_setat_TTF", arraylist_setat_TTF) == NULL ||
+      CU_add_test(pSuite, "arraylist_size_TTP", arraylist_size_TTP) == NULL ||
+      CU_add_test(pSuite, "arraylist_size_TTF", arraylist_size_TTF) == NULL ||
       CU_add_test(pSuite, "arraylist_sort_TTP", arraylist_sort_TTP) == NULL ||
       CU_add_test(pSuite, "arraylist_sort_TTF", arraylist_sort_TTF) == NULL ||
       CU_add_test(pSuite, "arraylist_toarray_TTP", arraylist_toarray_TTP) == NULL ||
@@ -2745,6 +2831,8 @@ int main(void) {
       CU_add_test(pSuite, "stack_removelast_TTF", stack_removelast_TTF) == NULL ||
       CU_add_test(pSuite, "stack_setat_TTP", stack_setat_TTP) == NULL ||
       CU_add_test(pSuite, "stack_setat_TTF", stack_setat_TTF) == NULL ||
+      CU_add_test(pSuite, "stack_size_TTP", stack_size_TTP) == NULL ||
+      CU_add_test(pSuite, "stack_size_TTF", stack_size_TTF) == NULL ||
       CU_add_test(pSuite, "stack_sort_TTP", stack_sort_TTP) == NULL ||
       CU_add_test(pSuite, "stack_sort_TTF", stack_sort_TTF) == NULL ||
       CU_add_test(pSuite, "stack_toarray_TTP", stack_toarray_TTP) == NULL ||
