@@ -82,7 +82,16 @@ int alist_addfirst(arraylist_t* list, void* e) {
 
 
 int alist_addv(arraylist_t* list, int nbargs, ...) {
-  va_list ap;
+  int ret;
+  va_list arglist;
+  va_start(arglist, nbargs);
+  ret = alist_addvlist(list, nbargs, arglist);
+  va_end(arglist);
+  return ret;
+}
+
+
+int alist_addvlist(arraylist_t* list, int nbargs, va_list ap) {
   void *e, *tmp_array;
   int i, nb = 0, tmp_size = nbargs * sizeof(void*);
   if (list == NULL) {
@@ -95,7 +104,6 @@ int alist_addv(arraylist_t* list, int nbargs, ...) {
   }
   memset(tmp_array, 0, tmp_size);
   // Copy the arguments in an array. Check for NULL values
-  va_start(ap, nbargs);
   for (i = 0; i < nbargs; i++) {
     e = va_arg(ap, void*);
     if (e == NULL) {
@@ -111,7 +119,6 @@ int alist_addv(arraylist_t* list, int nbargs, ...) {
     if (alist_add(list, e))
       nb++;
   }
-  va_end(ap);
   free(tmp_array);
   cerrno = CERR_SUCCESS;
   return nb;
@@ -427,24 +434,24 @@ int alist_removelast(arraylist_t* list) {
 }
 
 
-void* alist_setat(arraylist_t* list, int index, void* e) {
-  void* previous;
+int alist_setat(arraylist_t* list, int index, void* e, void* previous) {
   if (list == NULL || e == NULL) {
     cerrno = CERR_NULLVALUE;
-    return NULL;
+    return 0;
   }
   if (index < 0 || index >= list->size) {
     cerrno = CERR_BADINDEX;
-    return NULL;
+    return 0;
   }
-  if ((previous = malloc(list->data_size)) == NULL) {
-    cerrno = CERR_SYSTEM;
-    return NULL;
+  if (previous == NULL) {
+    memcpy(list->data[index], e, list->data_size);
+    return 1;
   }
   memcpy(previous, list->data[index], list->data_size);
   memcpy(list->data[index], e, list->data_size);
-  return previous;
+  return 1;
 }
+
 
 int alist_sort(arraylist_t* list, comparefct_t compare) {
   void* tmp_array;

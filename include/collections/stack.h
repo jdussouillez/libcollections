@@ -172,7 +172,7 @@ void* stack_peeklast(stack_t* stack);
 
 /*
  * Removes the object at the top of this stack and returns that object as the value of this function.
- * On success, returns the last element of the stack.
+ * On success, returns the last element of the stack (or NULL if the stack is empty).
  * ON error, returns NULL and "cerrno" is set appropriately.
  */
 void* stack_pop(stack_t* stack);
@@ -224,10 +224,12 @@ int stack_removelast(stack_t* stack);
 
 /*
  * Replaces the element at the specified position in this stack with the specified element.
- * On success, returns the element previously at the specified position.
- * On error, returns NULL and "cerrno" is set appropriately.
+ * If "previous" pointer param is NULL, the previous element is deleted.
+ * If "previous" pointer param is a valid pointer (memory allocated), it contains the previous element.
+ * On success, returns 1 and "previous" points to the previous element (if a valid memory pointer was passed).
+ * On error, returns 0 and "cerrno" is set appropriately.
  */
-void* stack_setat(stack_t* stack, int index, void* e);
+int stack_setat(stack_t* stack, int index, void* e, void* previous);
 
 /*
  * Sorts the stack (using the quick sort algorithm).

@@ -28,8 +28,12 @@ int stack_addfirst(stack_t* stack, void* e) {
 
 
 int stack_addv(stack_t* stack, int nbargs, ...) {
-  // TODO:
-  return -1;
+  int ret;
+  va_list arglist;
+  va_start(arglist, nbargs);
+  ret = alist_addvlist(stack, nbargs, arglist);
+  va_end(arglist);
+  return ret;
 }
 
 
@@ -68,6 +72,7 @@ int stack_empty(stack_t* stack) {
     cerrno = CERR_NULLVALUE;
     return -1;
   }
+  cerrno = CERR_SUCCESS;
   return (stack->size == 0) ? 1 : 0;
 }
 
@@ -118,8 +123,20 @@ void* stack_peeklast(stack_t* stack) {
 
 
 void* stack_pop(stack_t* stack) {
-  // TODO:
-  return NULL;
+  void* e;
+  if (stack == NULL) {
+    cerrno = CERR_NULLVALUE;
+    return NULL;
+  }
+  cerrno = CERR_SUCCESS;
+  if (stack->size == 0)
+    return NULL;
+  if ((e = malloc(stack->data_size)) == 0) {
+    cerrno = CERR_SYSTEM;
+    return NULL;
+  }
+  memcpy(e, stack->data[stack->size - 1], stack->data_size);
+  return (stack_removeat(stack, stack->size - 1) == -1) ? NULL : e;
 }
 
 
@@ -153,8 +170,8 @@ int stack_removelast(stack_t* stack) {
 }
 
 
-void* stack_setat(stack_t* stack, int index, void* e) {
-  return alist_setat(stack, index, e);
+int stack_setat(stack_t* stack, int index, void* e, void* previous) {
+  return alist_setat(stack, index, e, previous);
 }
 
 

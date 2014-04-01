@@ -1183,7 +1183,8 @@ void arraylist_setat_TTP() {
   alist_add(alist, &i);
   // alist = [4, 8] -> alist = [4, 16];
   i = 16;
-  previous = alist_setat(alist, 1, &i);
+  previous = malloc(size_int);
+  CU_ASSERT_EQUAL(alist_setat(alist, 1, &i, previous), 1);
   CU_ASSERT_EQUAL(*((int*) previous), 8);
   free(previous);
   CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
@@ -1549,16 +1550,16 @@ void arraylist_removelast_TTF() {
 void arraylist_setat_TTF() {
   i = 1;
   // NULL list
-  CU_ASSERT_PTR_NULL(alist_setat(NULL, 0, &i));
+  CU_ASSERT_EQUAL(alist_setat(NULL, 0, &i, NULL), 0);
   CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
   // NULL element
   alist = alist_new(size_int);
-  CU_ASSERT_PTR_NULL(alist_setat(alist, 0, NULL));
+  CU_ASSERT_EQUAL(alist_setat(alist, 0, NULL, NULL), 0);
   CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
   // Bad index
-  CU_ASSERT_PTR_NULL(alist_setat(alist, -1, &i));
+  CU_ASSERT_EQUAL(alist_setat(alist, -1, &i, NULL), 0);
   CU_ASSERT_EQUAL(cerrno, CERR_BADINDEX);
-  CU_ASSERT_PTR_NULL(alist_setat(alist, 0, &i));
+  CU_ASSERT_EQUAL(alist_setat(alist, 0, &i, NULL), 0);
   CU_ASSERT_EQUAL(cerrno, CERR_BADINDEX);
   alist_destroy(&alist);
 }

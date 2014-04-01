@@ -23,7 +23,6 @@ static char* tostring_int(void* p) {
 int main(void) {
   char* str;
   int i, j;
-  void* e;
   arraylist_t* list;
   if ((list = alist_new(sizeof(int))) == NULL)
     HANDLE_ERR("alist_new");
@@ -63,9 +62,8 @@ int main(void) {
   // list = [64, 2, 4, 8, 32, 16, 66]
 
   i = 128;
-  if ((e = alist_setat(list, 6, &i)) == NULL)
-    HANDLE_ERR("alist_add");
-  free(e);
+  if (alist_setat(list, 6, &i, NULL))
+    HANDLE_ERR("alist_setat");
   // list = [64, 2, 4, 8, 32, 16, 128]
 
   // Affichage de la liste ([2, 4, 8, 16, 32, 64, 128])

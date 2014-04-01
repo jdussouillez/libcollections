@@ -62,6 +62,13 @@ int alist_addfirst(arraylist_t* list, void* e);
 int alist_addv(arraylist_t* list, int nbargs, ...);
 
 /*
+ * Same as addv, but takes a va_list argument.
+ * On success, returns the number of elements added.
+ * On error, 0 is returned and "cerrno" is set appropriately.
+ */
+int alist_addvlist(arraylist_t* list, int nbargs, va_list ap);
+
+/*
  * Removes all of the elements from this list.
  */
 void alist_clear(arraylist_t* list);
@@ -128,7 +135,7 @@ int alist_finddup(arraylist_t* list, arraylist_t* duplist, comparefct_t compare)
 arraylist_t* alist_fromarray(void* array, int size, size_t data_size);
 
 /*
- * Returns the element at the specified index in the list.
+ * Returns a pointer to the element at the specified index in the list.
  * On success, returns the element. On error, NULL is returned and "cerrno" is set appropriately.
  */
 void* alist_get(arraylist_t* list, int index);
@@ -209,10 +216,12 @@ int alist_removelast(arraylist_t* list);
 
 /*
  * Replaces the element at the specified position in this list with the specified element.
- * On success, returns the element previously at the specified position.
- * On error, returns NULL and "cerrno" is set appropriately.
+ * If "previous" pointer param is NULL, the previous element is deleted.
+ * If "previous" pointer param is a valid pointer (memory allocated), it contains the previous element.
+ * On success, returns 1 and "previous" points to the previous element (if a valid memory pointer was passed).
+ * On error, returns 0 and "cerrno" is set appropriately.
  */
-void* alist_setat(arraylist_t* list, int index, void* e);
+int alist_setat(arraylist_t* list, int index, void* e, void* previous);
 
 /*
  * Sorts the list (using the quick sort algorithm).
