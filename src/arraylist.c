@@ -528,7 +528,7 @@ void* alist_toarray(arraylist_t* list) {
 }
 
 char* alist_tostring(arraylist_t* list, tostringfct_t tostring) {
-  char *strlist, *strelem;
+  char *strlist = NULL, *strelem = NULL;
   int i, bufsize = CBUFSIZE * sizeof(char);
   if (list == NULL || tostring == NULL) {
     cerrno = CERR_NULLVALUE;

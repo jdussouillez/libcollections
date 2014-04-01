@@ -17,12 +17,12 @@ build:
 		$(CC) $(CFLAGS) $(f).c -o $(f) $(LIB); \
 	)
 
-clean: clean_tmp
-	@$(foreach f, $(EXEC), \
-		rm -vf $f; \
-	)
-
 clean_tmp:
 	@rm -vf *~
 
-distclean mrproper veryclean: clean
+clean: clean_tmp
+
+distclean mrproper veryclean:
+	@$(foreach f, $(EXEC), \
+		rm -vf $f; \
+	)
