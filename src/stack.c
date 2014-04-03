@@ -97,6 +97,11 @@ int stack_issorted(stack_t* stack, comparefct_t compare) {
 }
 
 
+int stack_lastindexof(stack_t* stack, void* e, comparefct_t compare) {
+  return alist_lastindexof(stack, e, compare);
+}
+
+
 stack_t* stack_new(size_t data_size) {
   return alist_new(data_size);
 }

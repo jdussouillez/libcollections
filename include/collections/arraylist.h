@@ -161,6 +161,13 @@ int alist_indexof(arraylist_t* list, void* e, comparefct_t compare);
 int alist_issorted(arraylist_t* list, comparefct_t compare);
 
 /*
+ * Returns the last index of the element "e".
+ * On success, returns the last index of the element, or -1 if the list does not contain the element.
+ * On error, returns -1 and "cerrno" is set appropriately
+ */
+int alist_lastindexof(arraylist_t* list, void* e, comparefct_t compare);
+
+/*
  * Creates a new list.
  * On success, returns the list.
  * On error, NULL is returned and "cerrno" is set appropriately.

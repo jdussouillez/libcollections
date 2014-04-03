@@ -1066,6 +1066,21 @@ void arraylist_issorted_TTP() {
   alist_destroy(&alist);
 }
 
+void arraylist_lastindexof_TTP() {
+  alist = alist_new(size_int);
+  i = 1;
+  int j = 2;
+  alist_addv(alist, 3, &i, &j, &j);
+  // alist = [1, 2, 2]
+  // Last index of "1" (&i)
+  CU_ASSERT_EQUAL(alist_lastindexof(alist, &i, compare_int), 0);
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  // Last index of "2" (&j)
+  CU_ASSERT_EQUAL(alist_lastindexof(alist, &j, compare_int), 2);
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  alist_destroy(&alist);
+}
+
 void arraylist_peekfirst_TTP() {
   alist = alist_new(size_int);
   // On an empty list
@@ -1543,6 +1558,21 @@ void arraylist_issorted_TTF() {
   alist_destroy(&alist);
 }
 
+void arraylist_lastindexof_TTF() {
+  alist = alist_new(size_int);
+  // NULL list
+  i = 1;
+  CU_ASSERT_EQUAL(alist_lastindexof(NULL, &i, compare_int), -1);
+  CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
+  // NULL element
+  CU_ASSERT_EQUAL(alist_lastindexof(alist, NULL, compare_int), -1);
+  CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
+  // element not in the list
+  CU_ASSERT_EQUAL(alist_lastindexof(alist, &i, compare_int), -1);
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  alist_destroy(&alist);
+}
+
 void arraylist_peekfirst_TTF() {
   // NULL list
   CU_ASSERT_PTR_NULL(alist_peekfirst(NULL));
@@ -1976,6 +2006,21 @@ void stack_issorted_TTP() {
   stack_add(stack, &i);
   // On a non-sorted stack ([1, 2, 3, 1, -5])
   CU_ASSERT_EQUAL(stack_issorted(stack, compare_int), 0);
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  stack_destroy(&stack);
+}
+
+void stack_lastindexof_TTP() {
+  stack = stack_new(size_int);
+  i = 1;
+  int j = 2;
+  stack_addv(stack, 3, &i, &j, &j);
+  // stack = [1, 2, 2]
+  // Last index of "1" (&i)
+  CU_ASSERT_EQUAL(stack_lastindexof(stack, &i, compare_int), 0);
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  // Last index of "2" (&j)
+  CU_ASSERT_EQUAL(stack_lastindexof(stack, &j, compare_int), 2);
   CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
   stack_destroy(&stack);
 }
@@ -2480,6 +2525,21 @@ void stack_issorted_TTF() {
   stack_destroy(&stack);
 }
 
+void stack_lastindexof_TTF() {
+  stack = stack_new(size_int);
+  // NULL stack
+  i = 1;
+  CU_ASSERT_EQUAL(stack_lastindexof(NULL, &i, compare_int), -1);
+  CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
+  // NULL element
+  CU_ASSERT_EQUAL(stack_lastindexof(stack, NULL, compare_int), -1);
+  CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
+  // element not in the stack
+  CU_ASSERT_EQUAL(stack_lastindexof(stack, &i, compare_int), -1);
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  stack_destroy(&stack);
+}
+
 void stack_peekfirst_TTF() {
   // NULL stack
   CU_ASSERT_PTR_NULL(stack_peekfirst(NULL));
@@ -2739,6 +2799,8 @@ int main(void) {
       CU_add_test(pSuite, "arraylist_indexof_TTF", arraylist_indexof_TTF) == NULL ||
       CU_add_test(pSuite, "arraylist_issorted_TTP", arraylist_issorted_TTP) == NULL ||
       CU_add_test(pSuite, "arraylist_issorted_TTF", arraylist_issorted_TTF) == NULL ||
+      CU_add_test(pSuite, "arraylist_lastindexof_TTP", arraylist_lastindexof_TTP) == NULL ||
+      CU_add_test(pSuite, "arraylist_lastindexof_TTF", arraylist_lastindexof_TTF) == NULL ||
       CU_add_test(pSuite, "arraylist_peekfirst_TTP", arraylist_peekfirst_TTP) == NULL ||
       CU_add_test(pSuite, "arraylist_peekfirst_TTF", arraylist_peekfirst_TTF) == NULL ||
       CU_add_test(pSuite, "arraylist_peeklast_TTP", arraylist_peeklast_TTP) == NULL ||
@@ -2808,9 +2870,11 @@ int main(void) {
       CU_add_test(pSuite, "stack_get_TTP", stack_get_TTP) == NULL ||
       CU_add_test(pSuite, "stack_get_TTF", stack_get_TTF) == NULL ||
       CU_add_test(pSuite, "stack_indexof_TTP", stack_indexof_TTP) == NULL ||
-      CU_add_test(pSuite, "arraylist_indexof_TTF", stack_indexof_TTF) == NULL ||
+      CU_add_test(pSuite, "stack_indexof_TTF", stack_indexof_TTF) == NULL ||
       CU_add_test(pSuite, "stack_issorted_TTP", stack_issorted_TTP) == NULL ||
       CU_add_test(pSuite, "stack_issorted_TTF", stack_issorted_TTF) == NULL ||
+      CU_add_test(pSuite, "stack_lastindexof_TTP", stack_lastindexof_TTP) == NULL ||
+      CU_add_test(pSuite, "stack_lastindexof_TTF", stack_lastindexof_TTF) == NULL ||
       CU_add_test(pSuite, "stack_peekfirst_TTP", stack_peekfirst_TTP) == NULL ||
       CU_add_test(pSuite, "stack_peekfirst_TTF", stack_peekfirst_TTF) == NULL ||
       CU_add_test(pSuite, "stack_peeklast_TTP", stack_peeklast_TTP) == NULL ||

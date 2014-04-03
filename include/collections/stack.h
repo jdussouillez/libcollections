@@ -142,6 +142,13 @@ int stack_indexof(stack_t* stack, void* e, comparefct_t compare);
 int stack_issorted(stack_t* stack, comparefct_t compare);
 
 /*
+ * Returns the last index of the element "e".
+ * On success, returns the last index of the element, or -1 if the stack does not contain the element.
+ * On error, returns -1 and "cerrno" is set appropriately
+ */
+int stack_lastindexof(stack_t* stack, void* e, comparefct_t compare);
+
+/*
  * Creates a new stack.
  * On success, returns the stack.
  * On error, NULL is returned and "cerrno" is set appropriately.

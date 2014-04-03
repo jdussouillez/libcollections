@@ -322,6 +322,24 @@ int alist_issorted(arraylist_t* list, comparefct_t compare) {
 }
 
 
+int alist_lastindexof(arraylist_t* list, void* e, comparefct_t compare) {
+  int i;
+  if (list == NULL || e == NULL || compare == NULL) {
+    cerrno = CERR_NULLVALUE;
+    return -1;
+  }
+  cerrno = CERR_SUCCESS;
+  for (i = list->size - 1; i >= 0; i--) {
+      if (((compare == NULL) ?
+	   memcmp(list->data[i], e, list->data_size) :
+	   compare(list->data[i], e)) == 0) {
+	return i;
+      }
+  }
+  return -1;
+}
+
+
 arraylist_t* alist_new(size_t data_size) {
   arraylist_t* list = malloc(sizeof(arraylist_t));
   if (list == NULL) {
