@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include "collections/arraylist.h"
+#include "collections/deque.h"
 #include "collections/errors.h"
 #include "collections/linkedlist.h"
 #include "collections/stack.h"
@@ -32,6 +33,7 @@ int i, size_int = sizeof(int);
 linkedlist_t* llist;
 arraylist_t* alist;
 stack_t* stack;
+deque_t* deque;
 
 /*
  * CUnit Test Suite
@@ -673,7 +675,7 @@ void linkedlist_peekfirst_TTF() {
 
 void linkedlist_peeklast_TTF() {
   // NULL list
-  CU_ASSERT_PTR_NULL(llist_peekfirst(NULL));
+  CU_ASSERT_PTR_NULL(llist_peeklast(NULL));
   CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
 }
 
@@ -1298,6 +1300,23 @@ void arraylist_sort_TTP() {
   alist_destroy(&alist);
 }
 
+void arraylist_sublist_TTP() {
+  arraylist_t* sub;
+  alist = alist_new(size_int);
+  i = 1;
+  alist_addv(alist, 2, &i, &i);
+  i = 2;
+  alist_addv(alist, 2, &i, &i);
+  sub = alist_sublist(alist, 1, 3);
+  CU_ASSERT_PTR_NOT_NULL(sub);
+  CU_ASSERT_EQUAL(alist_size(alist), 4);
+  CU_ASSERT_EQUAL(alist_size(sub), 2);
+  CU_ASSERT_EQUAL(*((int*) sub->data[0]), 1);
+  CU_ASSERT_EQUAL(*((int*) sub->data[1]), 2);
+  alist_destroy(&sub);
+  alist_destroy(&alist);
+}
+
 void arraylist_toarray_TTP() {
   void* array = NULL;
   alist = alist_new(size_int);
@@ -1672,6 +1691,23 @@ void arraylist_sort_TTF() {
   CU_ASSERT_EQUAL(alist_sort(alist, NULL), 0);
   CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
   alist_destroy(&alist);
+}
+
+void arraylist_sublist_TTF() {
+  // NULL list
+  CU_ASSERT_PTR_NULL(alist_sublist(NULL, 0, 2));
+  CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
+  // Bad start index
+  alist = alist_new(size_int);
+  CU_ASSERT_PTR_NULL(alist_sublist(alist, -1, 2));
+  CU_ASSERT_EQUAL(cerrno, CERR_BADINDEX);
+  // Bad last index
+  CU_ASSERT_PTR_NULL(alist_sublist(alist, 0, 2));
+  CU_ASSERT_EQUAL(cerrno, CERR_BADINDEX);
+  // Bad index (start index >= last index)
+  CU_ASSERT_PTR_NULL(alist_sublist(alist, 3, 3));
+  CU_ASSERT_EQUAL(cerrno, CERR_BADINDEX);
+ alist_destroy(&alist);
 }
 
 void arraylist_toarray_TTF() {
@@ -2264,6 +2300,23 @@ void stack_sort_TTP() {
   stack_destroy(&stack);
 }
 
+void stack_substack_TTP() {
+  stack_t* sub;
+  stack = stack_new(size_int);
+  i = 1;
+  stack_addv(stack, 2, &i, &i);
+  i = 2;
+  stack_addv(stack, 2, &i, &i);
+  sub = stack_substack(stack, 1, 3);
+  CU_ASSERT_PTR_NOT_NULL(sub);
+  CU_ASSERT_EQUAL(stack_size(stack), 4);
+  CU_ASSERT_EQUAL(stack_size(sub), 2);
+  CU_ASSERT_EQUAL(*((int*) sub->data[0]), 1);
+  CU_ASSERT_EQUAL(*((int*) sub->data[1]), 2);
+  stack_destroy(&sub);
+  stack_destroy(&stack);
+}
+
 void stack_toarray_TTP() {
   void* array = NULL;
   stack = stack_new(size_int);
@@ -2662,6 +2715,23 @@ void stack_sort_TTF() {
   stack_destroy(&stack);
 }
 
+void stack_substack_TTF() {
+  // NULL stack
+  CU_ASSERT_PTR_NULL(stack_substack(NULL, 0, 2));
+  CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
+  // Bad start index
+  stack = stack_new(size_int);
+  CU_ASSERT_PTR_NULL(stack_substack(stack, -1, 2));
+  CU_ASSERT_EQUAL(cerrno, CERR_BADINDEX);
+  // Bad last index
+  CU_ASSERT_PTR_NULL(stack_substack(stack, 0, 2));
+  CU_ASSERT_EQUAL(cerrno, CERR_BADINDEX);
+  // Bad index (start index >= last index)
+  CU_ASSERT_PTR_NULL(stack_substack(stack, 3, 3));
+  CU_ASSERT_EQUAL(cerrno, CERR_BADINDEX);
+  stack_destroy(&stack);
+}
+
 void stack_toarray_TTF() {
   // NULL stack
   CU_ASSERT_PTR_NULL(stack_toarray(NULL));
@@ -2679,6 +2749,591 @@ void stack_tostring_TTF() {
   stack_destroy(&stack);
 }
 
+
+/*
+*********************************************
+ **************** Deque suite ***************
+ ********************************************
+ */
+/*
+ * Test-to-pass
+ */
+void deque_new_destroy_TTP() {
+  deque = deque_new(size_int);
+  CU_ASSERT_PTR_NOT_NULL(deque);
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  deque_destroy(&deque);
+  CU_ASSERT_PTR_NULL(deque);
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+}
+
+void deque_addall_TTP() {
+  deque_t* deque2 = deque_new(size_int);
+  i = 1;
+  deque_addlast(deque2, &i);
+  i = 2;
+  deque_addlast(deque2, &i);
+  deque = deque_new(size_int);
+  // deque = [], deque2 = [1, 2]
+  deque_addall(deque, deque2);
+  // deque = [1, 2], deque2 = [1, 2]
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  CU_ASSERT_EQUAL(deque->size, 2);
+  // Check elemens of the deque
+  // i = 2
+  CU_ASSERT_EQUAL(compare_int(deque_peeklast(deque), &i), 0);
+  i = 1;
+  CU_ASSERT_EQUAL(compare_int(deque_peekfirst(deque), &i), 0);
+  deque_destroy(&deque2);
+  deque_destroy(&deque);
+}
+
+void deque_addfirst_TTP() {
+  deque = deque_new(size_int);
+  // Add an element at the beginning of an empty deque
+  i = 1;
+  CU_ASSERT_TRUE(deque_addfirst(deque, &i));
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  CU_ASSERT_EQUAL(compare_int(deque_peekfirst(deque), &i), 0);
+  // Add an element at the beginning of a non-empty deque
+  i = 2;
+  CU_ASSERT_TRUE(deque_addfirst(deque, &i));
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  CU_ASSERT_EQUAL(compare_int(deque_peekfirst(deque), &i), 0);
+  deque_destroy(&deque);
+}
+
+void deque_addlast_TTP() {
+  deque = deque_new(size_int);
+  // Add an element when the deque is empty
+  i = 1;
+  CU_ASSERT_TRUE(deque_addlast(deque, &i));
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  CU_ASSERT_EQUAL(deque->size, 1);
+  CU_ASSERT_EQUAL(compare_int(deque_peeklast(deque), &i), 0);
+  // Add an element when the deque is not empty
+  i = 2;
+  CU_ASSERT_TRUE(deque_addlast(deque, &i));
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  CU_ASSERT_EQUAL(deque->size, 2);
+  CU_ASSERT_EQUAL(compare_int(deque_peeklast(deque), &i), 0);
+  deque_destroy(&deque);
+}
+
+void deque_clear_TTP() {
+  deque = deque_new(size_int);
+  i = 1;
+  // Add 3 elements and clear the deque
+  deque_addlast(deque, &i);
+  deque_addlast(deque, &i);
+  deque_addlast(deque, &i);
+  deque_clear(deque);
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  CU_ASSERT_EQUAL(deque->size, 0);
+  deque_destroy(&deque);
+}
+
+void deque_clone_TTP() {
+  deque_t* deque2;
+  deque = deque_new(size_int);
+  i = 1;
+  deque_addlast(deque, &i);
+  i = 2;
+  deque_addlast(deque, &i);
+  deque2 = deque_clone(deque);
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  CU_ASSERT_PTR_NOT_NULL(deque2);
+  CU_ASSERT_EQUAL(deque->size, deque2->size);
+  CU_ASSERT_EQUAL(compare_int(deque_peekfirst(deque), deque_peekfirst(deque2)), 0);
+  CU_ASSERT_EQUAL(compare_int(deque_peeklast(deque), deque_peeklast(deque2)), 0);
+  deque_destroy(&deque);
+  deque_destroy(&deque2);
+}
+
+void deque_cmp_TTP() {
+  deque_t* deque2 = deque_new(size_int);
+  // Different size of data
+  deque = deque_new(sizeof(float));
+  CU_ASSERT_EQUAL(deque_cmp(deque, deque2, compare_int), (sizeof(float) - size_int));
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  deque_destroy(&deque);
+  // Different size
+  deque = deque_new(size_int); // deque = [] (size = 0)
+  i = 3;
+  deque_addlast(deque2, &i); // deque2 = [3] (size = 1)
+  CU_ASSERT_EQUAL(deque_cmp(deque, deque2, compare_int), -1); // 0 - 1 = -1
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  // Different elements
+  i = 7;
+  deque_addlast(deque, &i); // deque = [7], deque2 = [3]
+  CU_ASSERT_EQUAL(deque_cmp(deque2, deque, compare_int), (3 - 7));
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  // Same deques
+  deque_addlast(deque2, &i); // deque2 = [3, 7]
+  i = 3;
+  deque_addfirst(deque, &i); // deque = [3, 7]
+  CU_ASSERT_EQUAL(deque_cmp(deque, deque2, compare_int), 0);
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  deque_destroy(&deque);
+  deque_destroy(&deque2);
+}
+
+void deque_contains_TTP() {
+  deque = deque_new(size_int);
+  // The deque is empty (so 4 is not found)
+  i = 4;
+  CU_ASSERT_FALSE(deque_contains(deque, &i, compare_int));
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  // deque = [1, 2]
+  i = 1;
+  deque_addlast(deque, &i);
+  i = 2;
+  deque_addlast(deque, &i);
+  // The deque does not contain 4
+  i = 4;
+  CU_ASSERT_FALSE(deque_contains(deque, &i, compare_int));
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  // The deque contains 2
+  i = 2;
+  CU_ASSERT_TRUE(deque_contains(deque, &i, compare_int));
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  deque_destroy(&deque);
+}
+
+void deque_count_TTP() {
+  deque = deque_new(size_int);
+  i = 0;
+  deque_addlast(deque, &i);
+  i = 1;
+  deque_addlast(deque, &i);
+  deque_addlast(deque, &i);
+  // deque = [0, 1, 1]
+  // The deque contains twice the element 1
+  CU_ASSERT_EQUAL(deque_count(deque, &i, compare_int), 2);
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  i = 2;
+  // The deque does not contain an element 2
+  CU_ASSERT_EQUAL(deque_count(deque, &i, compare_int), 0);
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  deque_destroy(&deque);
+}
+
+void deque_empty_TTP() {
+  deque = deque_new(size_int);
+  CU_ASSERT_EQUAL(deque_empty(deque), 1);
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  i = 1;
+  deque_addlast(deque, &i);
+  CU_ASSERT_EQUAL(deque_empty(deque), 0);
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  deque_destroy(&deque);
+}
+
+void deque_fromarray_TTP() {
+  int i = 1, j = 2;
+  int array[2] = {i, j};
+  deque = deque_fromarray(array, 2, sizeof(int));
+  CU_ASSERT_PTR_NOT_NULL(deque);
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  CU_ASSERT_EQUAL(deque->size, 2);
+  // Check values
+  CU_ASSERT_EQUAL(compare_int(deque_peekfirst(deque), &i), 0);
+  CU_ASSERT_EQUAL(compare_int(deque_peeklast(deque), &j), 0);
+  deque_destroy(&deque);
+}
+
+void deque_peekfirst_TTP() {
+  deque = deque_new(size_int);
+  // On an empty deque
+  CU_ASSERT_EQUAL(deque_peekfirst(deque), NULL);
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  // On a deque of 2 elements
+  i = 1;
+  deque_addlast(deque, &i);
+  i = 2;
+  deque_addlast(deque, &i);
+  i = 1;
+  CU_ASSERT_EQUAL(compare_int(deque_peekfirst(deque), &i), 0);
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  deque_destroy(&deque);
+}
+
+void deque_peeklast_TTP() {
+  deque = deque_new(size_int);
+  // On an empty deque
+  CU_ASSERT_EQUAL(deque_peeklast(deque), NULL);
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  // On a deque of 2 elements
+  i = 1;
+  deque_addlast(deque, &i);
+  i = 2;
+  deque_addlast(deque, &i);
+  CU_ASSERT_EQUAL(compare_int(deque_peeklast(deque), &i), 0);
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  deque_destroy(&deque);
+}
+
+void deque_pollfirst_TTP() {
+  void* tmp;
+  deque = deque_new(size_int);
+  // On an empty deque
+  CU_ASSERT_EQUAL(deque_pollfirst(deque), NULL);
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  // On a deque of 2 elements
+  i = 1;
+  deque_addlast(deque, &i);
+  i = 2;
+  deque_addlast(deque, &i);
+  tmp = deque_pollfirst(deque);
+  CU_ASSERT_EQUAL(*((int*) tmp), 1);
+  free(tmp);
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  CU_ASSERT_EQUAL(deque->size, 1);
+  deque_destroy(&deque);
+}
+
+void deque_polllast_TTP() {
+  void* tmp;
+  deque = deque_new(size_int);
+  // On an empty deque
+  CU_ASSERT_EQUAL(deque_pollfirst(deque), NULL);
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  // On a deque of 2 elements
+  i = 1;
+  deque_addlast(deque, &i);
+  i = 2;
+  deque_addlast(deque, &i);
+  tmp = deque_polllast(deque);
+  CU_ASSERT_EQUAL(*((int*) tmp), 2);
+  free(tmp);
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  CU_ASSERT_EQUAL(deque->size, 1);
+  deque_destroy(&deque);
+}
+
+void deque_removeall_TTP() {
+  deque = deque_new(size_int);
+  // Remove all the elements 1 in the deque (2 elements removed)
+  i = 2;
+  deque_addlast(deque, &i);
+  i = 1;
+  deque_addlast(deque, &i);
+  deque_addlast(deque, &i);
+  // deque = [2, 1, 1]
+  CU_ASSERT_EQUAL(deque->size, 3);
+  CU_ASSERT_EQUAL(deque_removeall(deque, &i, compare_int), 2);
+  CU_ASSERT_EQUAL(deque->size, 1);
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  // Remove all the elements 1 in the deque (no elements removed), deque = [2]
+  i = 1;
+  CU_ASSERT_EQUAL(deque_removeall(deque, &i, compare_int), 0);
+  CU_ASSERT_EQUAL(deque->size, 1);
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  // Remove all the elements of the deque
+  deque_clear(deque);
+  i = 1;
+  deque_addlast(deque, &i);
+  deque_addlast(deque, &i);
+  deque_addlast(deque, &i);
+  CU_ASSERT_EQUAL(deque->size, 3);
+  CU_ASSERT_EQUAL(deque_removeall(deque, &i, compare_int), 3);
+  CU_ASSERT_EQUAL(deque->size, 0);
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  // Remove on an empty deque
+  deque_clear(deque);
+  CU_ASSERT_EQUAL(deque_removeall(deque, &i, compare_int), 0);
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  deque_destroy(&deque);
+}
+
+void deque_removefirst_TTP() {
+  deque = deque_new(size_int);
+  // On an empty deque
+  CU_ASSERT_EQUAL(deque_removefirst(deque), 0);
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  // On a non-empty deque
+  i = 1;
+  deque_addlast(deque, &i);
+  i = 2;
+  deque_addlast(deque, &i);
+  CU_ASSERT_EQUAL(deque_removefirst(deque), 1);
+  CU_ASSERT_EQUAL(deque->size, 1);
+  CU_ASSERT_EQUAL(compare_int(deque_peekfirst(deque), &i), 0);
+  deque_destroy(&deque);
+}
+
+void deque_removelast_TTP() {
+  deque = deque_new(size_int);
+  // On an empty deque
+  CU_ASSERT_EQUAL(deque_removelast(deque), 0);
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  // On a non-empty deque
+  i = 1;
+  deque_addlast(deque, &i);
+  i = 2;
+  deque_addlast(deque, &i);
+  CU_ASSERT_EQUAL(deque_removelast(deque), 1);
+  CU_ASSERT_EQUAL(deque->size, 1);
+  i = 1;
+  CU_ASSERT_EQUAL(compare_int(deque_peeklast(deque), &i), 0);
+  deque_destroy(&deque);
+}
+
+void deque_size_TTP() {
+  deque = deque_new(size_int);
+  CU_ASSERT_EQUAL(deque_size(deque), 0);
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  i = 1;
+  deque_addlast(deque, &i);
+  CU_ASSERT_EQUAL(deque_size(deque), 1);
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  deque_destroy(&deque);
+}
+
+void deque_toarray_TTP() {
+  void* array = NULL;
+  deque = deque_new(size_int);
+  // Empty deque
+  array = deque_toarray(deque);
+  CU_ASSERT_PTR_NOT_NULL(array);
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  free(array);
+  array = NULL;
+  // Non-empty deque
+  i = 1;
+  deque_addlast(deque, &i);
+  i = 2;
+  deque_addlast(deque, &i);
+  array = deque_toarray(deque);
+  CU_ASSERT_PTR_NOT_NULL(array);
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  // Check values
+  i = 1;
+  CU_ASSERT_EQUAL(compare_int(array, &i), 0);
+  i = 2;
+  CU_ASSERT_EQUAL(compare_int(array + deque->data_size, &i), 0);
+  free(array);
+  deque_destroy(&deque);
+}
+
+void deque_tostring_TTP() {
+  char* str;
+  deque = deque_new(size_int);
+  // On an empty deque
+  str = deque_tostring(deque, inttostring);
+  CU_ASSERT_PTR_NOT_NULL(str);
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  CU_ASSERT_EQUAL(strcmp(str, "[]"), 0);
+  free(str);
+  str = NULL;
+  // On a non-empty deque
+  i = 1;
+  deque_addlast(deque, &i);
+  i = 2;
+  deque_addlast(deque, &i);
+  i = 4;
+  deque_addlast(deque, &i);
+  i = 8;
+  deque_addlast(deque, &i);
+  i = 16;
+  deque_addlast(deque, &i);
+  str = deque_tostring(deque, inttostring);
+  CU_ASSERT_PTR_NOT_NULL(str);
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  CU_ASSERT_EQUAL(strcmp(str, "[1, 2, 4, 8, 16]"), 0);
+  free(str);
+  deque_destroy(&deque);
+}
+
+/*
+ ********************************
+ * Test-to-fail
+ ********************************
+ */
+void deque_destroy_TTF() {
+  // NULL deque and NULL pointer
+  deque = NULL;
+  deque_destroy(&deque);
+  CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
+  deque_destroy(NULL);
+  CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
+}
+
+void deque_addall_TTF() {
+  deque = deque_new(size_int);
+  // Source deque is NULL
+  CU_ASSERT_FALSE(deque_addall(deque, NULL));
+  CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
+  // Destination deque is NULL
+  CU_ASSERT_FALSE(deque_addall(NULL, deque));
+  CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
+  // Both parameters are NULL
+  CU_ASSERT_FALSE(deque_addall(NULL, NULL));
+  CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
+  // Addall on the same deque is forbidden (infinite loop if not forbidden)
+  CU_ASSERT_FALSE(deque_addall(deque, deque));
+  CU_ASSERT_EQUAL(cerrno, CERR_FORBIDDEN);
+  deque_destroy(&deque);
+}
+
+void deque_addlast_TTF() {
+  deque = deque_new(size_int);
+  // Add a NULL element
+  CU_ASSERT_FALSE(deque_addlast(deque, NULL));
+  CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
+  CU_ASSERT_EQUAL(deque->size, 0);
+  // Add an element to NULL
+  i = 1;
+  CU_ASSERT_FALSE(deque_addlast(NULL, &i));
+  CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
+  // Both parameters are NULL
+  CU_ASSERT_FALSE(deque_addlast(NULL, NULL));
+  CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
+  deque_destroy(&deque);
+}
+
+void deque_addfirst_TTF() {
+  deque = deque_new(size_int);
+  // Add NULL at the beginning of the deque
+  CU_ASSERT_FALSE(deque_addfirst(deque, NULL));
+  CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
+  // Add a value at the beginning of NULL
+  i = 1;
+  CU_ASSERT_FALSE(deque_addfirst(NULL, &i));
+  CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
+  deque_destroy(&deque);
+}
+
+void deque_clear_TTF() {
+  // NULL deque
+  deque_clear(NULL);
+  CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
+}
+
+void deque_clone_TTF() {
+  // NULL deque
+  CU_ASSERT_PTR_NULL(deque_clone(NULL));
+  CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
+}
+
+void deque_cmp_TTF() {
+  deque_t* deque2 = deque_new(size_int);
+  deque = deque_new(size_int);
+  // NULL deque 1
+  CU_ASSERT_EQUAL(deque_cmp(NULL, deque2, compare_int), -1);
+  CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
+  // NULL deque 2
+  CU_ASSERT_EQUAL(deque_cmp(deque, NULL, compare_int), -1);
+  CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
+  deque_destroy(&deque);
+  deque_destroy(&deque2);
+}
+
+void deque_contains_TTF() {
+  // NULL deque
+  i = 2;
+  CU_ASSERT_FALSE(deque_contains(NULL, &i, compare_int));
+  CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
+  // NULL element
+  deque = deque_new(size_int);
+  CU_ASSERT_FALSE(deque_contains(deque, NULL, compare_int));
+  CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
+  deque_destroy(&deque);
+}
+
+void deque_count_TTF() {
+  i = 1;
+  deque = deque_new(size_int);
+  // NULL deque
+  CU_ASSERT_EQUAL(deque_count(NULL, &i, compare_int), -1);
+  CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
+  // NULL element
+  CU_ASSERT_EQUAL(deque_count(deque, NULL, compare_int), -1);
+  CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
+  deque_destroy(&deque);
+}
+
+void deque_empty_TTF() {
+  CU_ASSERT_EQUAL(deque_empty(NULL), -1);
+  CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
+}
+
+void deque_fromarray_TTF() {
+  // NULL deque
+  CU_ASSERT_PTR_NULL(deque_fromarray(NULL, 2, sizeof(int)));
+  CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
+}
+
+void deque_peekfirst_TTF() {
+  // NULL deque
+  CU_ASSERT_PTR_NULL(deque_peekfirst(NULL));
+  CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
+}
+
+void deque_peeklast_TTF() {
+  // NULL deque
+  CU_ASSERT_PTR_NULL(deque_peeklast(NULL));
+  CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
+}
+
+void deque_pollfirst_TTF() {
+  // NULL deque
+  CU_ASSERT_PTR_NULL(deque_pollfirst(NULL));
+  CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
+}
+
+void deque_polllast_TTF() {
+  // NULL deque
+  CU_ASSERT_PTR_NULL(deque_polllast(NULL));
+  CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
+}
+
+void deque_removeall_TTF() {
+  i = 1;
+  deque = deque_new(size_int);
+  // NULL deque
+  CU_ASSERT_EQUAL(deque_removeall(NULL, &i, compare_int), -1);
+  CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
+  // NULL element
+  CU_ASSERT_EQUAL(deque_removeall(deque, NULL, compare_int), -1);
+  CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
+  deque_destroy(&deque);
+}
+
+void deque_removefirst_TTF() {
+  // NULL deque
+  CU_ASSERT_EQUAL(deque_removefirst(NULL), -1);
+  CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
+}
+
+void deque_removelast_TTF() {
+  // NULL deque
+  CU_ASSERT_EQUAL(deque_removelast(NULL), -1);
+  CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
+}
+
+void deque_size_TTF() {
+  // NULL deque
+  CU_ASSERT_EQUAL(deque_size(NULL), -1);
+  CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
+}
+
+void deque_toarray_TTF() {
+  // NULL deque
+  CU_ASSERT_PTR_NULL(deque_toarray(NULL));
+  CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
+}
+
+void deque_tostring_TTF() {
+  // NULL deque
+  CU_ASSERT_EQUAL(deque_tostring(NULL, inttostring), NULL);
+  CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
+  // NULL tostring function
+  deque = deque_new(size_int);
+  CU_ASSERT_EQUAL(deque_tostring(deque, NULL), NULL);
+  CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
+  deque_destroy(&deque);
+}
 
 /*
  ********************************************************
@@ -2821,6 +3476,8 @@ int main(void) {
       CU_add_test(pSuite, "arraylist_size_TTF", arraylist_size_TTF) == NULL ||
       CU_add_test(pSuite, "arraylist_sort_TTP", arraylist_sort_TTP) == NULL ||
       CU_add_test(pSuite, "arraylist_sort_TTF", arraylist_sort_TTF) == NULL ||
+      CU_add_test(pSuite, "arraylist_sublist_TTP", arraylist_sublist_TTP) == NULL ||
+      CU_add_test(pSuite, "arraylist_sublist_TTF", arraylist_sublist_TTF) == NULL ||
       CU_add_test(pSuite, "arraylist_toarray_TTP", arraylist_toarray_TTP) == NULL ||
       CU_add_test(pSuite, "arraylist_toarray_TTF", arraylist_toarray_TTF) == NULL ||
       CU_add_test(pSuite, "arraylist_tostring_TTP", arraylist_tostring_TTP) == NULL ||
@@ -2899,10 +3556,68 @@ int main(void) {
       CU_add_test(pSuite, "stack_size_TTF", stack_size_TTF) == NULL ||
       CU_add_test(pSuite, "stack_sort_TTP", stack_sort_TTP) == NULL ||
       CU_add_test(pSuite, "stack_sort_TTF", stack_sort_TTF) == NULL ||
+      CU_add_test(pSuite, "stack_substack_TTP", stack_substack_TTP) == NULL ||
+      CU_add_test(pSuite, "stack_substack_TTF", stack_substack_TTF) == NULL ||
       CU_add_test(pSuite, "stack_toarray_TTP", stack_toarray_TTP) == NULL ||
       CU_add_test(pSuite, "stack_toarray_TTF", stack_toarray_TTF) == NULL ||
       CU_add_test(pSuite, "stack_tostring_TTP", stack_tostring_TTP) == NULL ||
       CU_add_test(pSuite, "stack_tostring_TTF", stack_tostring_TTF) == NULL) {
+    CU_cleanup_registry();
+    return CU_get_error();
+  }
+
+  /*
+   *********************************
+   * Deque suite
+   *********************************
+   */
+  pSuite = CU_add_suite("Deque", init_suite, clean_suite);
+  if (pSuite == NULL) {
+    CU_cleanup_registry();
+    return CU_get_error();
+  }
+  if (CU_add_test(pSuite, "deque_new_destroy_TTP", deque_new_destroy_TTP) == NULL ||
+      CU_add_test(pSuite, "deque_destroy_TTF", deque_destroy_TTF) == NULL ||
+      CU_add_test(pSuite, "deque_addall_TTP", deque_addall_TTP) == NULL ||
+      CU_add_test(pSuite, "deque_addall_TTF", deque_addall_TTF) == NULL ||
+      CU_add_test(pSuite, "deque_addfirst_TTP", deque_addfirst_TTP) == NULL ||
+      CU_add_test(pSuite, "deque_addfirst_TTF", deque_addfirst_TTF) == NULL ||
+      CU_add_test(pSuite, "deque_addlast_TTP", deque_addlast_TTP) == NULL ||
+      CU_add_test(pSuite, "deque_addlast_TTF", deque_addlast_TTF) == NULL ||
+      CU_add_test(pSuite, "deque_clear_TTP", deque_clear_TTP) == NULL ||
+      CU_add_test(pSuite, "deque_clear_TTF", deque_clear_TTF) == NULL ||
+      CU_add_test(pSuite, "deque_clone_TTP", deque_clone_TTP) == NULL ||
+      CU_add_test(pSuite, "deque_clone_TTF", deque_clone_TTF) == NULL ||
+      CU_add_test(pSuite, "deque_cmp_TTP", deque_cmp_TTP) == NULL ||
+      CU_add_test(pSuite, "deque_cmp_TTF", deque_cmp_TTF) == NULL ||
+      CU_add_test(pSuite, "deque_contains_TTP", deque_contains_TTP) == NULL ||
+      CU_add_test(pSuite, "deque_contains_TTF", deque_contains_TTF) == NULL ||
+      CU_add_test(pSuite, "deque_count_TTP", deque_count_TTP) == NULL ||
+      CU_add_test(pSuite, "deque_count_TTF", deque_count_TTF) == NULL ||
+      CU_add_test(pSuite, "deque_empty_TTP", deque_empty_TTP) == NULL ||
+      CU_add_test(pSuite, "deque_empty_TTF", deque_empty_TTF) == NULL ||
+      CU_add_test(pSuite, "deque_fromarray_TTP", deque_fromarray_TTP) == NULL ||
+      CU_add_test(pSuite, "deque_fromarray_TTF", deque_fromarray_TTF) == NULL ||
+      CU_add_test(pSuite, "deque_peekfirst_TTP", deque_peekfirst_TTP) == NULL ||
+      CU_add_test(pSuite, "deque_peekfirst_TTF", deque_peekfirst_TTF) == NULL ||
+      CU_add_test(pSuite, "deque_peeklast_TTP", deque_peeklast_TTP) == NULL ||
+      CU_add_test(pSuite, "deque_peeklast_TTF", deque_peeklast_TTF) == NULL ||
+      CU_add_test(pSuite, "deque_pollfirst_TTP", deque_pollfirst_TTP) == NULL ||
+      CU_add_test(pSuite, "deque_pollfirst_TTF", deque_pollfirst_TTF) == NULL ||
+      CU_add_test(pSuite, "deque_polllast_TTP", deque_polllast_TTP) == NULL ||
+      CU_add_test(pSuite, "deque_polllast_TTF", deque_polllast_TTF) == NULL ||
+      CU_add_test(pSuite, "deque_removeall_TTP", deque_removeall_TTP) == NULL ||
+      CU_add_test(pSuite, "deque_removeall_TTF", deque_removeall_TTF) == NULL ||
+      CU_add_test(pSuite, "deque_removefirst_TTP", deque_removefirst_TTP) == NULL ||
+      CU_add_test(pSuite, "deque_removefirst_TTF", deque_removefirst_TTF) == NULL ||
+      CU_add_test(pSuite, "deque_removelast_TTP", deque_removelast_TTP) == NULL ||
+      CU_add_test(pSuite, "deque_removelast_TTF", deque_removelast_TTF) == NULL ||
+      CU_add_test(pSuite, "deque_size_TTP", deque_size_TTP) == NULL ||
+      CU_add_test(pSuite, "deque_size_TTF", deque_size_TTF) == NULL ||
+      CU_add_test(pSuite, "deque_toarray_TTP", deque_toarray_TTP) == NULL ||
+      CU_add_test(pSuite, "deque_toarray_TTF", deque_toarray_TTF) == NULL ||
+      CU_add_test(pSuite, "deque_tostring_TTP", deque_tostring_TTP) == NULL ||
+      CU_add_test(pSuite, "deque_tostring_TTF", deque_tostring_TTF) == NULL) {
     CU_cleanup_registry();
     return CU_get_error();
   }

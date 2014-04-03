@@ -148,6 +148,7 @@ void* alist_get(arraylist_t* list, int index);
 
 /*
  * Returns the index of the element "e".
+ * If "compare" is NULL, the function uses memcmp(3).
  * On success, returns the index of the element, or -1 if the list does not contain the element.
  * On error, returns -1 and "cerrno" is set appropriately.
  */
@@ -162,6 +163,7 @@ int alist_issorted(arraylist_t* list, comparefct_t compare);
 
 /*
  * Returns the last index of the element "e".
+ * If "compare" is NULL, the function uses memcmp(3).
  * On success, returns the last index of the element, or -1 if the list does not contain the element.
  * On error, returns -1 and "cerrno" is set appropriately
  */
@@ -244,9 +246,17 @@ int alist_size(arraylist_t* list);
 
 /*
  * Sorts the list (using the quick sort algorithm).
+ * The "compare" function can not be NULL.
  * On error, 0 is returned and "cerrno" is set appropriately.
  */
 int alist_sort(arraylist_t* list, comparefct_t compare);
+
+/*
+ * Returns a sublist of "list" from startIndex (inclusive) to endIndex (exclusive).
+ * On success, returns the sublist.
+ * On error, returns NULL and "cerrno" is set appropriately.
+ */
+arraylist_t* alist_sublist(arraylist_t* list, int startIndex, int endIndex);
 
 /*
  * Returns an array containing all of the elements in the
@@ -261,6 +271,7 @@ void* alist_toarray(arraylist_t* list);
  * The format is [elem1, elem2, elem3], where elemX
  * is a string returned by the function tostring(). The tostring function must returned an
  * pointer to a memory allocated with malloc(3) (the memory is freed in llist_tostring with free(3)).
+ * tostring pointer can not be NULL.
  * The maximum length of the returned string is CBUFSIZE (defined in core.h).
  * On error, returns NULL and "cerrno" is set appropriately.
  */

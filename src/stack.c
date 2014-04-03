@@ -185,6 +185,11 @@ int stack_sort(stack_t* stack, comparefct_t compare) {
 }
 
 
+stack_t* stack_substack(stack_t* stack, int startIndex, int endIndex) {
+  return alist_sublist(stack, startIndex, endIndex);
+}
+
+
 void* stack_toarray(stack_t* stack) {
   return alist_toarray(stack);
 }

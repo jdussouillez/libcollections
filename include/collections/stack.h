@@ -251,6 +251,13 @@ int stack_size(stack_t* stack);
 int stack_sort(stack_t* stack, comparefct_t compare);
 
 /*
+ * Returns a sublist of "stack" from startIndex (inclusive) to endIndex (exclusive).
+ * On success, returns the substack.
+ * On error, returns NULL and "cerrno" is set appropriately.
+ */
+stack_t* stack_substack(stack_t* stack, int startIndex, int endIndex);
+
+/*
  * Returns an array containing all of the elements in the
  * stack in proper sequence (from first to last element).
  * The new array is obtained with malloc(3) and can be freed with free(3).

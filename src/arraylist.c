@@ -158,7 +158,7 @@ arraylist_t* alist_clone(arraylist_t* list) {
 
 int alist_cmp(arraylist_t* l1, arraylist_t* l2, comparefct_t compare) {
   int cmp, i;
-  if (l1 == NULL || l2 == NULL || compare == NULL) {
+  if (l1 == NULL || l2 == NULL) {
     cerrno = CERR_NULLVALUE;
     return -1;
   }
@@ -190,7 +190,7 @@ int alist_contains(arraylist_t* list, void* e, comparefct_t compare) {
 
 int alist_count(arraylist_t* list, void* e, comparefct_t compare) {
   int cpt = 0;
-  if (list == NULL || e == NULL || compare == NULL) {
+  if (list == NULL || e == NULL) {
     cerrno = CERR_NULLVALUE;
     return -1;
   }
@@ -229,7 +229,7 @@ int alist_empty(arraylist_t* list) {
 
 
 int alist_finddup(arraylist_t* list, arraylist_t* duplist, comparefct_t compare) {
-  if (list == NULL || duplist == NULL || compare == NULL) {
+  if (list == NULL || duplist == NULL) {
     cerrno = CERR_NULLVALUE;
     return -1;
   }
@@ -285,7 +285,7 @@ void* alist_get(arraylist_t* list, int index) {
 
 int alist_indexof(arraylist_t* list, void* e, comparefct_t compare) {
   int i;
-  if (list == NULL || e == NULL || compare == NULL) {
+  if (list == NULL || e == NULL) {
     cerrno = CERR_NULLVALUE;
     return -1;
   }
@@ -304,7 +304,7 @@ int alist_indexof(arraylist_t* list, void* e, comparefct_t compare) {
 int alist_issorted(arraylist_t* list, comparefct_t compare) {
   int i;
   void* previous_data = NULL;
-  if (list == NULL || compare == NULL) {
+  if (list == NULL) {
     cerrno = CERR_NULLVALUE;
     return -1;
   }
@@ -324,7 +324,7 @@ int alist_issorted(arraylist_t* list, comparefct_t compare) {
 
 int alist_lastindexof(arraylist_t* list, void* e, comparefct_t compare) {
   int i;
-  if (list == NULL || e == NULL || compare == NULL) {
+  if (list == NULL || e == NULL) {
     cerrno = CERR_NULLVALUE;
     return -1;
   }
@@ -375,7 +375,7 @@ void* alist_peeklast(arraylist_t* list) {
 
 int alist_remove(arraylist_t* list, void* e, comparefct_t compare) {
   int index;
-  if (list == NULL || e == NULL || compare == NULL) {
+  if (list == NULL || e == NULL) {
     cerrno = CERR_NULLVALUE;
     return -1;
   }
@@ -389,7 +389,7 @@ int alist_remove(arraylist_t* list, void* e, comparefct_t compare) {
 int alist_removeall(arraylist_t* list, void* e, comparefct_t compare) {
   int i, cpt = 0;
   arraylist_t* tmp;
-  if (list == NULL || e == NULL || compare == NULL) {
+  if (list == NULL || e == NULL) {
     cerrno = CERR_NULLVALUE;
     return -1;
   }
@@ -524,6 +524,30 @@ int alist_sort(arraylist_t* list, comparefct_t compare) {
   }
   cerrno = CERR_SUCCESS;
   return 1;
+}
+
+
+arraylist_t* alist_sublist(arraylist_t* list, int startIndex, int endIndex) {
+  int i;
+  arraylist_t* sub;
+  if (list == NULL) {
+    cerrno = CERR_NULLVALUE;
+    return NULL;
+  }
+  if (startIndex < 0 || endIndex >= list->size || startIndex >= endIndex) {
+    cerrno = CERR_BADINDEX;
+    return NULL;
+  }
+  if ((sub = alist_new(list->data_size)) == NULL)
+    return NULL;
+  for (i = startIndex; i < endIndex; i++) {
+    if (!alist_add(sub, list->data[i])) {
+      alist_destroy(&sub);
+      return NULL;
+    }
+  }
+  cerrno = CERR_SUCCESS;
+  return sub;
 }
 
 

@@ -202,7 +202,7 @@ int llist_size(linkedlist_t* list);
  * Sorts the list (using the quick sort algorithm).
  * It transforms the list into an array, clears the list,
  * sorts the array (using qsort(3)) and finally fills the list.
- * If "compare" function can not be NULL (error CERR_NULLVALUE).
+ * "compare" function can not be NULL (error CERR_NULLVALUE).
  * On success, returns 1.
  * On error, 0 is returned and "cerrno" is set appropriately.
  */
