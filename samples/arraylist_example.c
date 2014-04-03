@@ -62,7 +62,7 @@ int main(void) {
   // list = [64, 2, 4, 8, 32, 16, 66]
 
   i = 128;
-  if (alist_setat(list, 6, &i, NULL))
+  if (!alist_setat(list, 6, &i, NULL))
     HANDLE_ERR("alist_setat");
   // list = [64, 2, 4, 8, 32, 16, 128]
 

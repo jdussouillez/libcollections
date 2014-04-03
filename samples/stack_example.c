@@ -90,6 +90,7 @@ int main(void) {
   free(str);
 
   // Try to push a NULL element
+  printf("\n// Try to push NULL -> error (printed by cperror())\n");
   if (!stack_push(s, NULL))
     HANDLE_ERR("stack_push", s);
 
