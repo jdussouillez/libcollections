@@ -19,9 +19,9 @@ libcollections provides different types of collections (see the samples folder) 
 
 - Linked list
 - Array list
-- Stack (using an array list)
-- Deque (Double-ended linked queue)
-- Queue (linked queue)
+- Stack *(using an array list)*
+- Deque *(Double-ended linked queue)*
+- Queue *(linked queue)*
 
 Have a look to the include file ("include/collections/name_of_collection.h") to see the available functions.
 
