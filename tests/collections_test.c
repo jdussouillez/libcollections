@@ -7,6 +7,7 @@
 #include "collections/errors.h"
 #include "collections/linkedlist.h"
 #include "collections/stack.h"
+#include "collections/queue.h"
 
 #include "CUnit/Basic.h"
 
@@ -34,6 +35,7 @@ linkedlist_t* llist;
 arraylist_t* alist;
 stack_t* stack;
 deque_t* deque;
+queue_t* queue;
 
 /*
  * CUnit Test Suite
@@ -92,7 +94,7 @@ void linkedlist_addall_TTP() {
   // llist = [1, 2], llist2 = [1, 2]
   CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
   CU_ASSERT_EQUAL(llist->size, 2);
-  // Check elemens of the list
+  // Check elements of the list
   // i = 2
   CU_ASSERT_EQUAL(compare_int(llist_peeklast(llist), &i), 0);
   i = 1;
@@ -796,7 +798,7 @@ void arraylist_addall_TTP() {
   // alist = [1, 2], alist2 = [1, 2]
   CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
   CU_ASSERT_EQUAL(alist->size, 2);
-  // Check elemens of the list
+  // Check elements of the list
   // i = 2
   CU_ASSERT_EQUAL(compare_int(alist_peeklast(alist), &i), 0);
   i = 1;
@@ -1774,7 +1776,7 @@ void stack_addall_TTP() {
   // stack = [1, 2], stack2 = [1, 2]
   CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
   CU_ASSERT_EQUAL(stack->size, 2);
-  // Check elemens of the stack
+  // Check elements of the stack
   // i = 2
   CU_ASSERT_EQUAL(compare_int(stack_peeklast(stack), &i), 0);
   i = 1;
@@ -2751,7 +2753,7 @@ void stack_tostring_TTF() {
 
 
 /*
-*********************************************
+ ********************************************
  **************** Deque suite ***************
  ********************************************
  */
@@ -2779,7 +2781,7 @@ void deque_addall_TTP() {
   // deque = [1, 2], deque2 = [1, 2]
   CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
   CU_ASSERT_EQUAL(deque->size, 2);
-  // Check elemens of the deque
+  // Check elements of the deque
   // i = 2
   CU_ASSERT_EQUAL(compare_int(deque_peeklast(deque), &i), 0);
   i = 1;
@@ -3335,6 +3337,495 @@ void deque_tostring_TTF() {
   deque_destroy(&deque);
 }
 
+
+/*
+ ********************************************
+ **************** Queue suite ***************
+ ********************************************
+ */
+/*
+ * Test-to-pass
+ */
+void queue_new_destroy_TTP() {
+  queue = queue_new(size_int);
+  CU_ASSERT_PTR_NOT_NULL(queue);
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  queue_destroy(&queue);
+  CU_ASSERT_PTR_NULL(queue);
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+}
+
+void queue_addall_TTP() {
+  queue_t* queue2 = queue_new(size_int);
+  i = 1;
+  queue_add(queue2, &i);
+  i = 2;
+  queue_add(queue2, &i);
+  queue = queue_new(size_int);
+  // queue = [], queue2 = [1, 2]
+  queue_addall(queue, queue2);
+  // queue = [1, 2], queue2 = [1, 2]
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  CU_ASSERT_EQUAL(queue->size, 2);
+  // Check elements of the queue
+  i = 1;
+  CU_ASSERT_EQUAL(compare_int(queue_peek(queue), &i), 0);
+  i = 2;
+  CU_ASSERT_EQUAL(compare_int(queue->head->data, &i), 0);
+  queue_destroy(&queue2);
+  queue_destroy(&queue);
+}
+
+void queue_add_TTP() {
+  queue = queue_new(size_int);
+  // Add an element in an empty queue
+  i = 1;
+  CU_ASSERT_TRUE(queue_add(queue, &i));
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  CU_ASSERT_EQUAL(compare_int(queue_peek(queue), &i), 0);
+  // Add an element in a non-empty queue
+  i = 2;
+  CU_ASSERT_TRUE(queue_add(queue, &i));
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  CU_ASSERT_EQUAL(*((int*) queue_peek(queue)), 1);
+  queue_destroy(&queue);
+}
+
+void queue_clear_TTP() {
+  queue = queue_new(size_int);
+  i = 1;
+  // Add 3 elements and clear the queue
+  queue_add(queue, &i);
+  queue_add(queue, &i);
+  queue_add(queue, &i);
+  queue_clear(queue);
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  CU_ASSERT_EQUAL(queue->size, 0);
+  queue_destroy(&queue);
+}
+
+void queue_clone_TTP() {
+  queue_t* queue2;
+  queue = queue_new(size_int);
+  i = 1;
+  queue_add(queue, &i);
+  i = 2;
+  queue_add(queue, &i);
+  queue2 = queue_clone(queue);
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  CU_ASSERT_PTR_NOT_NULL(queue2);
+  CU_ASSERT_EQUAL(queue->size, queue2->size);
+  CU_ASSERT_EQUAL(compare_int(queue_peek(queue), queue_peek(queue2)), 0);
+  CU_ASSERT_EQUAL(compare_int(queue->head->data, queue2->head->data), 0);
+  queue_destroy(&queue);
+  queue_destroy(&queue2);
+}
+
+void queue_cmp_TTP() {
+  queue_t* queue2 = queue_new(size_int);
+  // Different size of data
+  queue = queue_new(sizeof(float));
+  CU_ASSERT_EQUAL(queue_cmp(queue, queue2, compare_int), (sizeof(float) - size_int));
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  queue_destroy(&queue);
+  // Different size
+  queue = queue_new(size_int); // queue = [] (size = 0)
+  i = 3;
+  queue_add(queue2, &i); // queue2 = [3] (size = 1)
+  CU_ASSERT_EQUAL(queue_cmp(queue, queue2, compare_int), -1); // 0 - 1 = -1
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  // Different elements
+  i = 7;
+  queue_add(queue, &i); // queue = [7], queue2 = [3]
+  CU_ASSERT_EQUAL(queue_cmp(queue2, queue, compare_int), (3 - 7));
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  // Same elements
+  queue_clear(queue);
+  i = 3;
+  queue_add(queue, &i); // queue = [3]
+  CU_ASSERT_EQUAL(queue_cmp(queue2, queue, compare_int), 0);
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  queue_destroy(&queue);
+  queue_destroy(&queue2);
+}
+
+void queue_contains_TTP() {
+  queue = queue_new(size_int);
+  // The queue is empty (so 4 is not found)
+  i = 4;
+  CU_ASSERT_FALSE(queue_contains(queue, &i, compare_int));
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  // queue = [1, 2]
+  i = 1;
+  queue_add(queue, &i);
+  i = 2;
+  queue_add(queue, &i);
+  // The queue does not contain 4
+  i = 4;
+  CU_ASSERT_FALSE(queue_contains(queue, &i, compare_int));
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  // The queue contains 2
+  i = 2;
+  CU_ASSERT_TRUE(queue_contains(queue, &i, compare_int));
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  queue_destroy(&queue);
+}
+
+void queue_count_TTP() {
+  queue = queue_new(size_int);
+  i = 0;
+  queue_add(queue, &i);
+  i = 1;
+  queue_add(queue, &i);
+  queue_add(queue, &i);
+  // queue = [0, 1, 1]
+  // The queue contains twice the element 1
+  CU_ASSERT_EQUAL(queue_count(queue, &i, compare_int), 2);
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  i = 2;
+  // The queue does not contain an element 2
+  CU_ASSERT_EQUAL(queue_count(queue, &i, compare_int), 0);
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  queue_destroy(&queue);
+}
+
+void queue_empty_TTP() {
+  queue = queue_new(size_int);
+  CU_ASSERT_EQUAL(queue_empty(queue), 1);
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  i = 1;
+  queue_add(queue, &i);
+  CU_ASSERT_EQUAL(queue_empty(queue), 0);
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  queue_destroy(&queue);
+}
+
+void queue_fromarray_TTP() {
+  int i = 1, j = 2;
+  int array[2] = {i, j};
+  queue = queue_fromarray(array, 2, sizeof(int));
+  CU_ASSERT_PTR_NOT_NULL(queue);
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  CU_ASSERT_EQUAL(queue->size, 2);
+  // Check values
+  CU_ASSERT_EQUAL(compare_int(queue_peek(queue), &j), 0);
+  CU_ASSERT_EQUAL(compare_int(queue->head->data, &i), 0);
+  queue_destroy(&queue);
+}
+
+void queue_peek_TTP() {
+  queue = queue_new(size_int);
+  // On an empty queue
+  CU_ASSERT_EQUAL(queue_peek(queue), NULL);
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  // On a queue of 2 elements
+  i = 1;
+  queue_add(queue, &i);
+  i = 2;
+  queue_add(queue, &i);
+  i = 1;
+  CU_ASSERT_EQUAL(compare_int(queue_peek(queue), &i), 0);
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  queue_destroy(&queue);
+}
+
+void queue_poll_TTP() {
+  void* tmp;
+  queue = queue_new(size_int);
+  // On an empty queue
+  CU_ASSERT_EQUAL(queue_poll(queue), NULL);
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  // On a queue of 2 elements
+  i = 1;
+  queue_add(queue, &i);
+  i = 2;
+  queue_add(queue, &i);
+  tmp = queue_poll(queue);
+  CU_ASSERT_EQUAL(*((int*) tmp), 1);
+  free(tmp);
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  CU_ASSERT_EQUAL(queue->size, 1);
+  queue_destroy(&queue);
+}
+
+void queue_removeall_TTP() {
+  queue = queue_new(size_int);
+  // Remove all the elements 1 in the queue (2 elements removed)
+  i = 2;
+  queue_add(queue, &i);
+  i = 1;
+  queue_add(queue, &i);
+  queue_add(queue, &i);
+  // queue = [2, 1, 1]
+  CU_ASSERT_EQUAL(queue->size, 3);
+  CU_ASSERT_EQUAL(queue_removeall(queue, &i, compare_int), 2);
+  CU_ASSERT_EQUAL(queue->size, 1);
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  // Remove all the elements 1 in the queue (no elements removed), queue = [2]
+  i = 1;
+  CU_ASSERT_EQUAL(queue_removeall(queue, &i, compare_int), 0);
+  CU_ASSERT_EQUAL(queue->size, 1);
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  // Remove all the elements of the queue
+  queue_clear(queue);
+  i = 1;
+  queue_add(queue, &i);
+  queue_add(queue, &i);
+  queue_add(queue, &i);
+  CU_ASSERT_EQUAL(queue->size, 3);
+  CU_ASSERT_EQUAL(queue_removeall(queue, &i, compare_int), 3);
+  CU_ASSERT_EQUAL(queue->size, 0);
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  // Remove on an empty queue
+  queue_clear(queue);
+  CU_ASSERT_EQUAL(queue_removeall(queue, &i, compare_int), 0);
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  queue_destroy(&queue);
+}
+
+void queue_remove_TTP() {
+  queue = queue_new(size_int);
+  // On an empty queue
+  CU_ASSERT_EQUAL(queue_remove(queue), 0);
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  // On a non-empty queue
+  i = 1;
+  queue_add(queue, &i);
+  i = 2;
+  queue_add(queue, &i);
+  CU_ASSERT_EQUAL(queue_remove(queue), 1);
+  CU_ASSERT_EQUAL(queue->size, 1);
+  CU_ASSERT_EQUAL(compare_int(queue_peek(queue), &i), 0);
+  queue_destroy(&queue);
+}
+
+void queue_size_TTP() {
+  queue = queue_new(size_int);
+  CU_ASSERT_EQUAL(queue_size(queue), 0);
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  i = 1;
+  queue_add(queue, &i);
+  CU_ASSERT_EQUAL(queue_size(queue), 1);
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  queue_destroy(&queue);
+}
+
+void queue_toarray_TTP() {
+  void* array = NULL;
+  queue = queue_new(size_int);
+  // Empty queue
+  array = queue_toarray(queue);
+  CU_ASSERT_PTR_NOT_NULL(array);
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  free(array);
+  array = NULL;
+  // Non-empty queue
+  i = 1;
+  queue_add(queue, &i);
+  i = 2;
+  queue_add(queue, &i);
+  array = queue_toarray(queue);
+  CU_ASSERT_PTR_NOT_NULL(array);
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  // Check values
+  i = 2;
+  CU_ASSERT_EQUAL(compare_int(array, &i), 0);
+  i = 1;
+  CU_ASSERT_EQUAL(compare_int(array + queue->data_size, &i), 0);
+  free(array);
+  queue_destroy(&queue);
+}
+
+void queue_tostring_TTP() {
+  char* str;
+  queue = queue_new(size_int);
+  // On an empty queue
+  str = queue_tostring(queue, inttostring);
+  CU_ASSERT_PTR_NOT_NULL(str);
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  CU_ASSERT_EQUAL(strcmp(str, "[]"), 0);
+  free(str);
+  str = NULL;
+  // On a non-empty queue
+  i = 1;
+  queue_add(queue, &i);
+  i = 2;
+  queue_add(queue, &i);
+  i = 4;
+  queue_add(queue, &i);
+  i = 8;
+  queue_add(queue, &i);
+  i = 16;
+  queue_add(queue, &i);
+  str = queue_tostring(queue, inttostring);
+  CU_ASSERT_PTR_NOT_NULL(str);
+  CU_ASSERT_EQUAL(cerrno, CERR_SUCCESS);
+  CU_ASSERT_EQUAL(strcmp(str, "[16, 8, 4, 2, 1]"), 0);
+  free(str);
+  queue_destroy(&queue);
+}
+
+/*
+ ********************************
+ * Test-to-fail
+ ********************************
+ */
+void queue_destroy_TTF() {
+  // NULL queue and NULL pointer
+  queue = NULL;
+  queue_destroy(&queue);
+  CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
+  queue_destroy(NULL);
+  CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
+}
+
+void queue_addall_TTF() {
+  queue = queue_new(size_int);
+  // Source queue is NULL
+  CU_ASSERT_FALSE(queue_addall(queue, NULL));
+  CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
+  // Destination queue is NULL
+  CU_ASSERT_FALSE(queue_addall(NULL, queue));
+  CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
+  // Both parameters are NULL
+  CU_ASSERT_FALSE(queue_addall(NULL, NULL));
+  CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
+  // Addall on the same queue is forbidden (infinite loop if not forbidden)
+  CU_ASSERT_FALSE(queue_addall(queue, queue));
+  CU_ASSERT_EQUAL(cerrno, CERR_FORBIDDEN);
+  queue_destroy(&queue);
+}
+
+void queue_add_TTF() {
+  queue = queue_new(size_int);
+  // Add a NULL element
+  CU_ASSERT_FALSE(queue_add(queue, NULL));
+  CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
+  CU_ASSERT_EQUAL(queue->size, 0);
+  // Add an element to NULL
+  i = 1;
+  CU_ASSERT_FALSE(queue_add(NULL, &i));
+  CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
+  // Both parameters are NULL
+  CU_ASSERT_FALSE(queue_add(NULL, NULL));
+  CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
+  queue_destroy(&queue);
+}
+
+void queue_clear_TTF() {
+  // NULL queue
+  queue_clear(NULL);
+  CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
+}
+
+void queue_clone_TTF() {
+  // NULL queue
+  CU_ASSERT_PTR_NULL(queue_clone(NULL));
+  CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
+}
+
+void queue_cmp_TTF() {
+  queue_t* queue2 = queue_new(size_int);
+  queue = queue_new(size_int);
+  // NULL queue 1
+  CU_ASSERT_EQUAL(queue_cmp(NULL, queue2, compare_int), -1);
+  CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
+  // NULL queue 2
+  CU_ASSERT_EQUAL(queue_cmp(queue, NULL, compare_int), -1);
+  CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
+  queue_destroy(&queue);
+  queue_destroy(&queue2);
+}
+
+void queue_contains_TTF() {
+  // NULL queue
+  i = 2;
+  CU_ASSERT_FALSE(queue_contains(NULL, &i, compare_int));
+  CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
+  // NULL element
+  queue = queue_new(size_int);
+  CU_ASSERT_FALSE(queue_contains(queue, NULL, compare_int));
+  CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
+  queue_destroy(&queue);
+}
+
+void queue_count_TTF() {
+  i = 1;
+  queue = queue_new(size_int);
+  // NULL queue
+  CU_ASSERT_EQUAL(queue_count(NULL, &i, compare_int), -1);
+  CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
+  // NULL element
+  CU_ASSERT_EQUAL(queue_count(queue, NULL, compare_int), -1);
+  CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
+  queue_destroy(&queue);
+}
+
+void queue_empty_TTF() {
+  CU_ASSERT_EQUAL(queue_empty(NULL), -1);
+  CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
+}
+
+void queue_fromarray_TTF() {
+  // NULL queue
+  CU_ASSERT_PTR_NULL(queue_fromarray(NULL, 2, sizeof(int)));
+  CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
+}
+
+void queue_peek_TTF() {
+  // NULL queue
+  CU_ASSERT_PTR_NULL(queue_peek(NULL));
+  CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
+}
+
+void queue_poll_TTF() {
+  // NULL queue
+  CU_ASSERT_PTR_NULL(queue_poll(NULL));
+  CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
+}
+
+void queue_removeall_TTF() {
+  i = 1;
+  queue = queue_new(size_int);
+  // NULL queue
+  CU_ASSERT_EQUAL(queue_removeall(NULL, &i, compare_int), -1);
+  CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
+  // NULL element
+  CU_ASSERT_EQUAL(queue_removeall(queue, NULL, compare_int), -1);
+  CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
+  queue_destroy(&queue);
+}
+
+void queue_remove_TTF() {
+  // NULL queue
+  CU_ASSERT_EQUAL(queue_remove(NULL), -1);
+  CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
+}
+
+void queue_size_TTF() {
+  // NULL queue
+  CU_ASSERT_EQUAL(queue_size(NULL), -1);
+  CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
+}
+
+void queue_toarray_TTF() {
+  // NULL queue
+  CU_ASSERT_PTR_NULL(queue_toarray(NULL));
+  CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
+}
+
+void queue_tostring_TTF() {
+  // NULL queue
+  CU_ASSERT_EQUAL(queue_tostring(NULL, inttostring), NULL);
+  CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
+  // NULL tostring function
+  queue = queue_new(size_int);
+  CU_ASSERT_EQUAL(queue_tostring(queue, NULL), NULL);
+  CU_ASSERT_EQUAL(cerrno, CERR_NULLVALUE);
+  queue_destroy(&queue);
+}
+
+
 /*
  ********************************************************
  ************************* Main *************************
@@ -3618,6 +4109,54 @@ int main(void) {
       CU_add_test(pSuite, "deque_toarray_TTF", deque_toarray_TTF) == NULL ||
       CU_add_test(pSuite, "deque_tostring_TTP", deque_tostring_TTP) == NULL ||
       CU_add_test(pSuite, "deque_tostring_TTF", deque_tostring_TTF) == NULL) {
+    CU_cleanup_registry();
+    return CU_get_error();
+  }
+
+  /*
+   *********************************
+   * Queue suite
+   *********************************
+   */
+  pSuite = CU_add_suite("Queue", init_suite, clean_suite);
+  if (pSuite == NULL) {
+    CU_cleanup_registry();
+    return CU_get_error();
+  }
+  if (CU_add_test(pSuite, "queue_new_destroy_TTP", queue_new_destroy_TTP) == NULL ||
+      CU_add_test(pSuite, "queue_destroy_TTF", queue_destroy_TTF) == NULL ||
+      CU_add_test(pSuite, "queue_addall_TTP", queue_addall_TTP) == NULL ||
+      CU_add_test(pSuite, "queue_addall_TTF", queue_addall_TTF) == NULL ||
+      CU_add_test(pSuite, "queue_add_TTP", queue_add_TTP) == NULL ||
+      CU_add_test(pSuite, "queue_add_TTF", queue_add_TTF) == NULL ||
+      CU_add_test(pSuite, "queue_clear_TTP", queue_clear_TTP) == NULL ||
+      CU_add_test(pSuite, "queue_clear_TTF", queue_clear_TTF) == NULL ||
+      CU_add_test(pSuite, "queue_clone_TTP", queue_clone_TTP) == NULL ||
+      CU_add_test(pSuite, "queue_clone_TTF", queue_clone_TTF) == NULL ||
+      CU_add_test(pSuite, "queue_cmp_TTP", queue_cmp_TTP) == NULL ||
+      CU_add_test(pSuite, "queue_cmp_TTF", queue_cmp_TTF) == NULL ||
+      CU_add_test(pSuite, "queue_contains_TTP", queue_contains_TTP) == NULL ||
+      CU_add_test(pSuite, "queue_contains_TTF", queue_contains_TTF) == NULL ||
+      CU_add_test(pSuite, "queue_count_TTP", queue_count_TTP) == NULL ||
+      CU_add_test(pSuite, "queue_count_TTF", queue_count_TTF) == NULL ||
+      CU_add_test(pSuite, "queue_empty_TTP", queue_empty_TTP) == NULL ||
+      CU_add_test(pSuite, "queue_empty_TTF", queue_empty_TTF) == NULL ||
+      CU_add_test(pSuite, "queue_fromarray_TTP", queue_fromarray_TTP) == NULL ||
+      CU_add_test(pSuite, "queue_fromarray_TTF", queue_fromarray_TTF) == NULL ||
+      CU_add_test(pSuite, "queue_peek_TTP", queue_peek_TTP) == NULL ||
+      CU_add_test(pSuite, "queue_peek_TTF", queue_peek_TTF) == NULL ||
+      CU_add_test(pSuite, "queue_poll_TTP", queue_poll_TTP) == NULL ||
+      CU_add_test(pSuite, "queue_poll_TTF", queue_poll_TTF) == NULL ||
+      CU_add_test(pSuite, "queue_removeall_TTP", queue_removeall_TTP) == NULL ||
+      CU_add_test(pSuite, "queue_removeall_TTF", queue_removeall_TTF) == NULL ||
+      CU_add_test(pSuite, "queue_remove_TTP", queue_remove_TTP) == NULL ||
+      CU_add_test(pSuite, "queue_remove_TTF", queue_remove_TTF) == NULL ||
+      CU_add_test(pSuite, "queue_size_TTP", queue_size_TTP) == NULL ||
+      CU_add_test(pSuite, "queue_size_TTF", queue_size_TTF) == NULL ||
+      CU_add_test(pSuite, "queue_toarray_TTP", queue_toarray_TTP) == NULL ||
+      CU_add_test(pSuite, "queue_toarray_TTF", queue_toarray_TTF) == NULL ||
+      CU_add_test(pSuite, "queue_tostring_TTP", queue_tostring_TTP) == NULL ||
+      CU_add_test(pSuite, "queue_tostring_TTF", queue_tostring_TTF) == NULL) {
     CU_cleanup_registry();
     return CU_get_error();
   }

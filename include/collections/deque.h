@@ -17,7 +17,7 @@ extern "C" {
 typedef linkedlist_t deque_t;
 
 /*
- * Inserts the specified element to the end of this list (memory copy).
+ * Inserts the specified element to the end of the deque (memory copy).
  * On success, returns 1.
  * On error, 0 is returned and "cerrno" is set appropriately.
  */
